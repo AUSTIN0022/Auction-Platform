@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registration Form</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles/style.css">
+  <style>
+    :root {
+      --bs-primary: #3a86ff;
+      --bs-secondary: #ff006e;
+      --bs-success: #38b000;
+      --bs-warning: #ffbe0b;
+      --bs-danger: #ff5400;
+      --bs-dark: #1a2639;
+    }
+    
+    body {
+      background-color: #f5f7fa;
+    }
+    
+    /* Custom styling for upload area */
+    .document-upload {
+      border: 2px dashed #d9e2ef;
+      padding: 2rem;
+      text-align: center;
+      border-radius: 10px;
+      background: #fbfbff;
+      transition: all 0.3s ease;
+    }
+    
+    .document-upload:hover {
+      border-color: var(--bs-primary);
+      background: #f5f8ff;
+    }
+    
+    /* Card animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .fade-in-card {
+      animation: fadeIn 0.4s ease-out;
+    }
+    
+    /* Divider with text */
+    .divider {
+      display: flex;
+      align-items: center;
+      color: var(--bs-gray);
+      margin: 1.5rem 0;
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: "";
+      flex: 1;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .divider::before {
+      margin-right: 1rem;
+    }
+    
+    .divider::after {
+      margin-left: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <!-- Registration Form -->
+    <div class="card shadow mb-5 fade-in-card">
+      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <div><i class="fas fa-user-plus"></i> Registration</div>
+        <div>
+          <button class="btn btn-primary"><i class="fas fa-arrow-left"></i> Back</button>
+        </div>
+      </div>
+      <div class="card-body p-4">
+        <div class="mx-auto" style="max-width: 500px;">
+          <h3 class="text-center mb-4">Create Your Account</h3>
+          
+          <div class="mb-3">
+            <label for="fullName" class="form-label"><i class="fas fa-user"></i> Full Name</label>
+            <input type="text" class="form-control" id="fullName" placeholder="Your full name">
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label"><i class="fas fa-envelope"></i> Email Address</label>
+            <input type="email" class="form-control" id="email" placeholder="your@email.com">
+          </div>
+          
+          <div class="mb-3">
+            <label for="mobile" class="form-label"><i class="fas fa-mobile-alt"></i> Mobile Number</label>
+            <input type="text" class="form-control" id="mobile" placeholder="+91 ">
+          </div>
+          
+          <div class="mb-3">
+            <label for="password" class="form-label"><i class="fas fa-lock"></i> Create Password</label>
+            <input type="password" class="form-control" id="password">
+          </div>
+          
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label"><i class="fas fa-lock"></i> Confirm Password</label>
+            <input type="password" class="form-control" id="confirmPassword">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label"><i class="fas fa-id-card"></i> Upload PAN Card for Verification</label>
+            <div class="document-upload">
+              <i class="fas fa-cloud-upload-alt text-primary" style="font-size: 40px; margin-bottom: 15px;"></i>
+              <div class="mb-3">Drop your PAN card image here or click to upload</div>
+              <button class="btn btn-primary"><i class="fas fa-folder-open"></i> Browse Files</button>
+            </div>
+          </div>
+          
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" id="terms">
+            <label class="form-check-label text-muted" for="terms">
+              I agree to the <a href="#" class="text-primary text-decoration-none">Terms and Conditions</a>
+            </label>
+          </div>
+          
+          <div class="mt-4">
+            <button class="btn btn-success w-100"><i class="fas fa-user-plus"></i> Register</button>
+          </div>
+          
+          <div class="mt-3 text-center text-muted">
+            Already have an account? <a href="#" class="text-primary text-decoration-none fw-bold">Login here</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

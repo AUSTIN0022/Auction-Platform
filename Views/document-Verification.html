@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document Verification</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles/style.css">
+  <style>
+    :root {
+      --bs-primary: #3a86ff;
+      --bs-secondary: #ff006e;
+      --bs-success: #38b000;
+      --bs-warning: #ffbe0b;
+      --bs-danger: #ff5400;
+    }
+    
+    body {
+      background-color: #f5f7fa;
+    }
+    
+    .gradient-text {
+      background: linear-gradient(135deg, #3a86ff 0%, #48beff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    
+    .card {
+      transition: all 0.3s ease;
+      border-radius: 10px;
+    }
+    
+    .card:hover {
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.1);
+      transform: translateY(-5px);
+    }
+    
+    .card-header {
+      background: linear-gradient(135deg, #3a86ff 0%, #48beff 100%);
+      color: white;
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, #3a86ff 0%, #48beff 100%);
+      border: none;
+    }
+    
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 10px;
+      border-radius: 50px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-badge::before {
+      content: '';
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 5px;
+      background: currentColor;
+      box-shadow: 0 0 0 2px rgba(255,255,255,0.5);
+    }
+    
+    .status-pending {
+      background-color: var(--bs-warning);
+    }
+    
+    .info-row {
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .info-label {
+      font-weight: 600;
+      color: #6c757d;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <!-- Admin: Document Verification Detail -->
+    <div class="card shadow mb-4">
+      <div class="card-header d-flex justify-content-between align-items-center py-3">
+        <div><i class="fas fa-id-card me-2"></i> Document Verification</div>
+        <div>
+          <button class="btn btn-primary"><i class="fas fa-arrow-left me-2"></i> Back to Requests</button>
+        </div>
+      </div>
+      
+      <div class="card-body p-4">
+        <h3 class="mb-4">Verification Details - Rahul Sharma (#U1089)</h3>
+
+        <div class="row mb-4">
+          <div class="col-md-6">
+            <div class="mb-4">
+              <div class="info-row d-flex">
+                <div class="info-label col-4">User ID</div>
+                <div class="col-8">#U1089</div>
+              </div>
+              <div class="info-row d-flex">
+                <div class="info-label col-4">Full Name</div>
+                <div class="col-8">Rahul Sharma</div>
+              </div>
+              <div class="info-row d-flex">
+                <div class="info-label col-4">Email</div>
+                <div class="col-8">rahul.s@example.com</div>
+              </div>
+              <div class="info-row d-flex">
+                <div class="info-label col-4">Mobile</div>
+                <div class="col-8">+91 98765 43210</div>
+              </div>
+              <div class="info-row d-flex">
+                <div class="info-label col-4">Registration Date</div>
+                <div class="col-8">05 Apr, 2025</div>
+              </div>
+              <div class="info-row d-flex">
+                <div class="info-label col-4">Verification Status</div>
+                <div class="col-8"><span class="status-badge status-pending">Pending</span></div>
+              </div>
+            </div>
+
+            <div class="mt-4">
+              <h4><i class="fas fa-history me-2 text-primary"></i> Activity Log</h4>
+              <table class="table table-borderless mt-3">
+                <tbody>
+                  <tr class="border-bottom">
+                    <td class="ps-0 py-2 text-secondary small">05 Apr, 2025 | 14:32</td>
+                    <td class="py-2">Account created</td>
+                  </tr>
+                  <tr class="border-bottom">
+                    <td class="ps-0 py-2 text-secondary small">05 Apr, 2025 | 14:35</td>
+                    <td class="py-2">PAN Card uploaded</td>
+                  </tr>
+                  <tr class="border-bottom">
+                    <td class="ps-0 py-2 text-secondary small">05 Apr, 2025 | 14:38</td>
+                    <td class="py-2">Email verified</td>
+                  </tr>
+                  <tr>
+                    <td class="ps-0 py-2 text-secondary small">05 Apr, 2025 | 14:45</td>
+                    <td class="py-2">Mobile verified via OTP</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h4><i class="fas fa-id-card me-2 text-primary"></i> PAN Card Verification</h4>
+            <div class="bg-light p-3 rounded text-center mb-3">
+              <img src="/api/placeholder/400/240" alt="PAN Card Image" class="img-fluid rounded">
+            </div>
+
+            <form>
+              <div class="mb-3">
+                <label for="pan-number" class="form-label">PAN Number (Extracted)</label>
+                <input type="text" id="pan-number" name="pan-number" class="form-control" value="ABCDE1234F">
+              </div>
+
+              <div class="mb-3">
+                <label for="pan-name" class="form-label">Name on PAN</label>
+                <input type="text" id="pan-name" name="pan-name" class="form-control" value="RAHUL SHARMA">
+              </div>
+
+              <button type="submit" class="btn btn-primary">Submit Verification</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
