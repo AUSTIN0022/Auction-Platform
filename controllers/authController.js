@@ -3,18 +3,32 @@ import jwt from 'jsonwebtoken';
 import { User } from '../model/DBModel.js';
 
 export const register = async (req, res) => {
-  const { name, email, password, matchPassword, mobile, address, role } = req.body;
+  const { name, email, password, matchPassword, mobile } = req.body;
+  console.log( name, email, password, matchPassword, mobile,);
 
-  if (!name || !email || !password || !matchPassword || !mobile || !role) {
-    return res.status(400).json({ success: false, message: "All fields are required" });
+  
+  const idProof = req.file?.path || null;
+  console.log(`ID-PROOF: ${idProof}`);
+
+  if (!name || !email || !password || !matchPassword || !mobile) {
+    return res.status(400).json({ 
+        success: false, 
+        message: "All fields are required" 
+    });
   }
 
-  if (!['admin', 'user'].includes(role)) {
-    return res.status(400).json({ success: false, message: "Invalid role specified" });
-  }
+//   if (!['admin', 'user'].includes(role)) {
+//     return res.status(400).json({ 
+//         success: false, 
+//         message: "Invalid role specified" 
+//     });
+//   }
 
   if (password !== matchPassword) {
-    return res.status(400).json({ success: false, message: "Passwords do not match" });
+    return res.status(400).json({ 
+        success: false, 
+        message: "Passwords do not match" 
+    });
   }
 
   try {
@@ -23,16 +37,26 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ name, email, password: hashedPassword, mobile, address, role });
+    const newUser = new User({ 
+        name, 
+        email, 
+        password: hashedPassword, 
+        mobile: parseInt(mobile), 
+        idProof,
+    });
     await newUser.save();
 
-    const token = jwt.sign({ userId: newUser._id, role: newUser.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ 
+        userId: newUser._id, 
+         
+    }, process.env.JWT_SECRET, 
+    { expiresIn: '24h' });
 
     res.status(201).json({
       success: true,
-      message: `${role} registered successfully.`,
+      message: `registered successfully.`,
       token,
-      user: { id: newUser._id, name: newUser.name, email: newUser.email, role: newUser.role }
+      user: { id: newUser._id, name: newUser.name, email: newUser.email }
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -43,19 +67,34 @@ export const login = async (req, res) => {
   const { email, password, role } = req.body;
 
   if (!email || !password || !role) {
-    return res.status(400).json({ success: false, message: "Email, password, and role are required" });
+    return res.status(400).json({ 
+        success: false, 
+        message: "Email, password, and role are required" });
   }
 
   try {
     const user = await User.findOne({ email, role });
-    if (!user) return res.status(404).json({ success: false, message: `${role} not found` });
+    if (!user) return res.status(404).json({ 
+        success: false, 
+        message: `${role} not found` 
+    });
 
-    if (!user.isActive) return res.status(403).json({ success: false, message: "Account deactivated" });
+    if (!user.isActive) return res.status(403).json({ 
+        success: false, 
+        message: "Account deactivated" 
+    });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ success: false, message: "Invalid credentials" });
+    if (!isMatch) return res.status(401).json({ 
+        success: false, 
+        message: "Invalid credentials" 
+    });
 
-    const token = jwt.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    const token = jwt.sign({ 
+        userId: user._id, 
+        role: user.role 
+    }, process.env.JWT_SECRET, 
+    { expiresIn: '24h' });
 
     res.status(200).json({
       success: true,

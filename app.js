@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
+import frontendRoutes from './routes/frontendRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -20,7 +21,11 @@ try {
   process.exit(1);
 }
 
+// Frontend
+app.use('/', frontendRoutes);
 
+
+// Backend
 app.use('/api/auth', authRoutes);
 
 

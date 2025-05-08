@@ -16,6 +16,7 @@ const UserSchema = new Schema({
     verifyStatus: { type: String, enum: ['verified', 'pending', 'rejected'], default: 'pending' },
     role: { type: String, enum: ['admin', 'user'], default: 'user' },
     isActive: { type: Boolean, default: true },
+    idProof: {type: String },
     profileImage: { type: String },
     address: { type: String },
     wallet: {
