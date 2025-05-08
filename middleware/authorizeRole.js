@@ -1,23 +1,32 @@
-import jwt from 'jsonwebtoken';
-import { User } from '../model/DBModel.js';
 
-export const authorizeRole = (requiredRole) => {
-  return async (req, res, next) => {
-    try {
-      const token = req.headers.authorization?.split(' ')[1];
-      if (!token) return res.status(401).json({ success: false, message: "Authentication required" });
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findById(decoded.userId);
 
-      if (!user || user.role !== requiredRole) {
-        return res.status(403).json({ success: false, message: "Access denied" });
-      }
-
-      req.user = user;
-      next();
-    } catch (error) {
-      res.status(401).json({ success: false, message: "Invalid token" });
+export const authorizeRole = (requiredRoles) => {
+  // Convert single role to array for consistent handling
+  const roles = Array.isArray(requiredRoles) ? requiredRoles : [requiredRoles];
+  
+  return (req, res, next) => {
+    // Since isLoggedIn middleware should run first, we already have req.user
+    if (!req.user) {
+      return res.status(500).json({ 
+        success: false, 
+        message: "Server error: User not authenticated" 
+      });
     }
+    
+    // Check if user has one of the required roles
+    if (!roles.includes(req.user.role)) {
+      // For API requests
+      if (req.xhr || req.headers.accept?.includes('application/json')) {
+        return res.status(403).json({ 
+          success: false, 
+          message: "Access denied" 
+        });
+      }
+      // For browser requests
+      return res.redirect('/error?type=forbidden&message=You do not have permission to access this page');
+    }
+    
+    next();
   };
 };
