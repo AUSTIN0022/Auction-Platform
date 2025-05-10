@@ -123,4 +123,4 @@ export const login = async (req, res) => {
         message: "An error occurred during login" 
       });
     }
-  };
+};
