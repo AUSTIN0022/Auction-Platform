@@ -43,7 +43,7 @@ router.get('/document-verification', isLoggedIn, authorizeRole('admin'), (req, r
 });
 
 // Only User
-router.get('/user-dashboard', isLoggedIn, authorizeRole('user'), (req, res) => {
+router.get('/dashboard', isLoggedIn, authorizeRole('user'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/user-dashboard.html'));
 });
 

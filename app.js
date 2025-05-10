@@ -1,8 +1,10 @@
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
 import authRoutes from './routes/authRoutes.js';
 import frontendRoutes from './routes/frontendRoutes.js';
+
 
 dotenv.config();
 const app = express();
@@ -11,6 +13,8 @@ app.use(express.static('views'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+app.use(cookieParser());
 
 
 try {

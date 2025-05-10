@@ -64,45 +64,63 @@ export const register = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-  const { email, password, role } = req.body;
+    const { email, password } = req.body;
+  
+    if (!email || !password) {
+      return res.status(400).json({ 
+          success: false, 
+          message: "Email and password are required" 
+      });
+    }
+  
+    try {
+      // Find user
+      const user = await User.findOne({ email });
+      
+      if (!user) return res.status(404).json({ 
+          success: false, 
+          message: "User not found" 
+      });
+  
+      if (!user.isActive) return res.status(403).json({ 
+          success: false, 
+          message: "Account deactivated" 
+      });
+  
+      const isMatch = await bcrypt.compare(password, user.password);
+      if (!isMatch) return res.status(401).json({ 
+          success: false, 
+          message: "Invalid credentials" 
+      });
+  
+      // create JWT token
+      const token = jwt.sign({ 
+          userId: user._id, 
+          role: user.role 
+      }, process.env.JWT_SECRET, 
+      { expiresIn: '24h' });
+      
 
-  if (!email || !password || !role) {
-    return res.status(400).json({ 
+      res.cookie("authToken",token, { maxAge: 3600000});
+
+      
+  
+      res.status(200).json({
+        success: true,
+        message: "Login successful",
+        token,
+        user: { 
+          id: user._id, 
+          name: user.name, 
+          email: user.email, 
+          role: user.role 
+        }
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ 
         success: false, 
-        message: "Email, password, and role are required" });
-  }
-
-  try {
-    const user = await User.findOne({ email, role });
-    if (!user) return res.status(404).json({ 
-        success: false, 
-        message: `${role} not found` 
-    });
-
-    if (!user.isActive) return res.status(403).json({ 
-        success: false, 
-        message: "Account deactivated" 
-    });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ 
-        success: false, 
-        message: "Invalid credentials" 
-    });
-
-    const token = jwt.sign({ 
-        userId: user._id, 
-        role: user.role 
-    }, process.env.JWT_SECRET, 
-    { expiresIn: '24h' });
-
-    res.status(200).json({
-      success: true,
-      message: "Login successful",
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role }
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: "Login error" });
-  }
-};
+        message: "An error occurred during login" 
+      });
+    }
+  };
