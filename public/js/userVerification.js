@@ -181,29 +181,89 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
 
-  function verifyUser(userId) {
-    // You would implement the API call here
-    alert(`Verify user with ID: ${userId}`);
-    // After successful verification, refresh the user data
-    fetchUsers();
+  window.verifyUser = async function(userId) {
+    if (!confirm("Are you sure you want to verify this user?")) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/verify`, {
+            method: "PUT"
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message || "Failed to verify user.");
+            return;
+        }
+
+        alert(data.message || `Verified user with ID: ${userId}`);
+        
+        // refresh the user
+        fetchUsers();
+
+    } catch (error) {
+        alert("An error occurred while verifying the user.");
+        console.error(error);
+    }
+}  
+
+  window.rejectUser = async function(userId) {
+    if (!confirm("Are you sure you want to reject this user?")) {
+        return;
+    }
+    try {
+        const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/reject`, {
+            method: "PUT"
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            alert(data.message || "Failed to reject user.");
+            return;
+        }
+
+        alert(data.message || `Rejected user with ID: ${userId}`);
+        
+        // refresh the user
+        fetchUsers();
+
+    } catch (error) {
+        alert("An error occurred while rejecting the user.");
+        console.error(error);
+    }
+  }
+  
+  
+ window.viewUserDetails = async function(userId) {
+    window.location.href = `http://localhost:3000/user-detail/${userId}`;
   }
   
 
-  function rejectUser(userId) {
-    // You would implement the API call here
-    alert(`Reject user with ID: ${userId}`);
-    // After successful rejection, refresh the user data
-    fetchUsers();
-  }
+  window.viewDocuments = async function (userId) {
+    try {
+      const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/documents`, {
+        method: "GET"
+      });
+      const data = await response.json();
   
+      if (!response.ok || !data.document) {
+        alert(data.message || "No document found.");
+        return;
+      }
   
-  function viewUserDetails(userId) {
-    // You would implement the details view here
-    alert(`View details for user with ID: ${userId}`);
-  }
+      const modalBody = document.getElementById("documentModalBody");
+      modalBody.innerHTML = `
+        <img src="${data.document}" class="img-fluid mb-3 rounded" 
+             style="max-height: 500px; display: block; margin: 0 auto;">
+      `;
   
-
-  function viewDocuments(userId) {
-    // You would implement the document viewer here
-    alert(`View documents for user with ID: ${userId}`);
-  }
+      const modal = new bootstrap.Modal(document.getElementById("documentModal"));
+      modal.show();
+  
+    } catch (error) {
+      alert("An error occurred while fetching the user document.");
+      console.error(error);
+    }
+  };
+  

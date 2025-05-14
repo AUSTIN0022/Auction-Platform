@@ -66,17 +66,83 @@ export const getAllUsers = async (req, res) => {
 };
 
 export const getUserById = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const user = await User.findOne( {_id: userId}).select({password:0});
+        
+        if(!user){
+            return res.json({ message: "User not found"});
+        }
+
+        return res.json( user );
+
+    } catch(error) {
+        console.error(`Error fetching user with ID ${userId} :`, error);
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
 
 };
 
 export const verifyUser = async (req, res) => {
+    const userId = req.params.id;
 
+    try {
+        const result = await User.updateOne(
+            { _id: userId },
+            { $set: { verifyStatus: "verified" } }
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ success: false, message: "Unable to verify user" });
+        }
+
+        return res.json({ success: true, message: "User verified" });
+
+    } catch (error) {
+        console.error(`Error verifying user with ID ${userId}:`, error);
+        res.status(500).json({ success: false, message: 'Internal server error' });
+    }
 };
 
-export const approveUser = async (req, res) => {
 
+export const rejectUser = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const result = await User.updateOne(
+            { _id: userId,} ,
+            { $set: { verifyStatus: "rejected" } }
+        )
+
+        if(!result) {
+            return res.json({ succuss: false, message: "unable to rejected user"});
+        }
+        
+        return res.json({ succuss: true, message: "rejected user"});
+
+    } catch(error) {
+        console.error(`Error rejected user with ID ${userId} :`, error);
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
 };
 
 export const getVerificationDocuments = async (req, res) => {
+    const userId = req.params.id;
 
+    try {
+        const result = await User.findOne( {_id: userId} ).select({ idProof:1});
+        
+        if(!result) {
+            return res.json({ succes: false, message: `Error fetching User documents`});
+        }
+
+        return res.json({ succes: true, message: "User document", document: result.idProof});
+    } catch(error) {
+        console.error(`Error fetching user document with ID ${userId} :`, error);
+        res.status(500).json({ message: 'Internal server error' });
+
+    }
 };

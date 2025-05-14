@@ -38,8 +38,8 @@ router.get('/create-auction', isLoggedIn,  authorizeRole('admin'), (req, res) =>
     res.sendFile(path.join(__dirname, '../views/create-auction.html'));
 });
 
-router.get('/document-verification', isLoggedIn, authorizeRole('admin'), (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/document-vertification.html'));
+router.get('/user-detail/:id', isLoggedIn, authorizeRole('admin'), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/userDetails.html'));
 });
 router.get('/user-verification', isLoggedIn, authorizeRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/user-verification.html'));

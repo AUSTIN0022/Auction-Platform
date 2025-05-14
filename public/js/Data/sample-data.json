@@ -11,6 +11,7 @@
         "role": "user",
         "isActive": true,
         "profileImage": "https://example.com/profiles/john.jpg",
+        "idProof": "https://res.cloudinary.com/doymcvtvy/image/upload/v1746645641/id_proofs/olnkxopnpaczhhuhbby3.png",
         "address": "123 Main St, Anytown, USA",
         "wallet": {
           "balance": 5000,
@@ -48,6 +49,7 @@
         "role": "admin",
         "isActive": true,
         "profileImage": "https://example.com/profiles/jane.jpg",
+        "idProof": "https://res.cloudinary.com/doymcvtvy/image/upload/v1746645641/id_proofs/olnkxopnpaczhhuhbby3.png",
         "address": "456 Oak Ave, Somewhere, USA",
         "wallet": {
           "balance": 10000,
@@ -77,6 +79,7 @@
         "role": "user",
         "isActive": true,
         "profileImage": "https://example.com/profiles/robert.jpg",
+        "idProof": "https://res.cloudinary.com/doymcvtvy/image/upload/v1746645641/id_proofs/olnkxopnpaczhhuhbby3.png",
         "address": "789 Pine Ln, Elsewhere, USA",
         "wallet": {
           "balance": 3500,
@@ -106,6 +109,7 @@
         "role": "user",
         "isActive": true,
         "profileImage": "https://example.com/profiles/sarah.jpg",
+        "idProof": "https://res.cloudinary.com/doymcvtvy/image/upload/v1746645641/id_proofs/olnkxopnpaczhhuhbby3.png",
         "address": "234 Elm St, Anytown, USA",
         "wallet": {
           "balance": 4500,
@@ -135,6 +139,7 @@
         "role": "admin",
         "isActive": true,
         "profileImage": "https://example.com/profiles/michael.jpg",
+        "idProof": "https://res.cloudinary.com/doymcvtvy/image/upload/v1746645641/id_proofs/olnkxopnpaczhhuhbby3.png",
         "address": "567 Maple Ave, Somewhere, USA",
         "wallet": {
           "balance": 12000,
@@ -164,6 +169,7 @@
         "role": "user",
         "isActive": true,
         "profileImage": "https://example.com/profiles/emily.jpg",
+        "idProof": "https://res.cloudinary.com/doymcvtvy/image/upload/v1746645641/id_proofs/olnkxopnpaczhhuhbby3.png",
         "address": "890 Cedar Ln, Elsewhere, USA",
         "wallet": {
           "balance": 6000,
