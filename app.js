@@ -2,6 +2,7 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
+import adminUserRoutes from './routes/admin/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import frontendRoutes from './routes/frontendRoutes.js';
 
@@ -31,6 +32,7 @@ app.use('/', frontendRoutes);
 
 // Backend
 app.use('/api/auth', authRoutes);
+app.use('/api/admin/users', adminUserRoutes);
 
 
 app.listen(process.env.PORT, () => {

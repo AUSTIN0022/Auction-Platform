@@ -4,11 +4,7 @@ import { User } from '../model/DBModel.js';
 
 export const register = async (req, res) => {
   const { name, email, password, matchPassword, mobile } = req.body;
-  console.log( name, email, password, matchPassword, mobile,);
-
-  
   const idProof = req.file?.path || null;
-  console.log(`ID-PROOF: ${idProof}`);
 
   if (!name || !email || !password || !matchPassword || !mobile) {
     return res.status(400).json({ 

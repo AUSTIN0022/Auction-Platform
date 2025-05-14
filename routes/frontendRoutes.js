@@ -41,6 +41,9 @@ router.get('/create-auction', isLoggedIn,  authorizeRole('admin'), (req, res) =>
 router.get('/document-verification', isLoggedIn, authorizeRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/document-vertification.html'));
 });
+router.get('/user-verification', isLoggedIn, authorizeRole('admin'), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/user-verification.html'));
+});
 
 // Only User
 router.get('/dashboard', isLoggedIn, authorizeRole('user'), (req, res) => {
