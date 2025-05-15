@@ -21,7 +21,7 @@ const UserSchema = new Schema({
     address: { type: String },
     wallet: {
         balance: { type: Number, default: 0 },
-        currency: { type: String, default: 'USD' },
+        currency: { type: String, default: 'INR' },
         transactions: [{
             amount: { type: Number, required: true },
             type: { type: String, enum: ['deposit', 'withdrawal', 'emd', 'payment', 'refund'], required: true },
@@ -45,12 +45,16 @@ const AuctionSchema = new Schema({
     emdAmount: { type: Number, required: true },
     status: { type: String, enum: ['draft', 'pending', 'active', 'completed', 'cancelled'], default: 'draft' },
     winner: { type: mongoose.Schema.Types.ObjectId, ref: 'users' },
-    categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'categories' }],
+    categorie: { type: mongoose.Schema.Types.ObjectId, ref: 'categories' },
     bidders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'users' }],
     bidLog: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bids' }],
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'users', required: true },
     ...commonFields
 }, { timestamps: true });
+
+AuctionSchema.index({ status: 1, startDate: 1 });
+AuctionSchema.index({ status: 1, endDate: 1 });
+
 
 const CategorySchema = new Schema({
     name: { type: String, required: true, unique: true },

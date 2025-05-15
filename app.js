@@ -2,10 +2,10 @@ import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
+import adminAuctionRoutes from './routes/admin/auctionRoutes.js';
 import adminUserRoutes from './routes/admin/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import frontendRoutes from './routes/frontendRoutes.js';
-
 
 dotenv.config();
 const app = express();
@@ -33,6 +33,7 @@ app.use('/', frontendRoutes);
 // Backend
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
+app.use('/api/admin/auction', adminAuctionRoutes);
 
 
 app.listen(process.env.PORT, () => {

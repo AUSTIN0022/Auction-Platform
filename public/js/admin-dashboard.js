@@ -10,6 +10,38 @@
     const systemAlertsTab = document.getElementById('systemAlertsTab');
     const auctionTableBody = document.getElementById('auctionTableBody');
 
+    // Logout
+    async function logout() {
+        if(!confirm("Are you sure you want to Logout")) return;
+        try {
+            const response = await fetch("http://localhost:3000/api/auth/logout");
+            
+            if (!response.ok) {
+                throw new Error(`Logout failed with status: ${response.status}`);
+            }
+            let data = await response.json();
+            console.log(data.message);
+            localStorage.clear();
+            
+            
+            window.location.href = "/";
+        } catch (error) {
+            alert("Error logging out: " + error.message);
+            console.error("Logout error:", error);
+        }
+    }
+
+    const logoutLink = document.querySelector('.logout-link');
+
+    
+    if (logoutLink) {
+        logoutLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+    } else {
+        console.error("Logout link not found");
+    }
 
     // Function to render auction table
     function renderAuctionTable() {
