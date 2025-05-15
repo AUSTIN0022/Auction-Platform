@@ -38,9 +38,21 @@ router.get('/create-auction', isLoggedIn,  authorizeRole('admin'), (req, res) =>
     res.sendFile(path.join(__dirname, '../views/create-auction.html'));
 });
 
+router.get('/view-auctions', isLoggedIn,  authorizeRole('admin'), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/view-auctions.html'));
+});
+router.get('/auctions/:id', isLoggedIn,  authorizeRole('admin'), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/auction-detail.html'));
+});
+
 router.get('/user-detail/:id', isLoggedIn, authorizeRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/userDetails.html'));
 });
+
+router.get('/auctions/edit/:id', isLoggedIn, authorizeRole('admin'), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/update-auction.html'));
+});
+
 router.get('/user-verification', isLoggedIn, authorizeRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/user-verification.html'));
 });

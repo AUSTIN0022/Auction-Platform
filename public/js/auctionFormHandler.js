@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showSuccess('Auction created successfully!');
             // You might want to redirect or reset the form here
             setTimeout(() => {
-              window.location.href = '/admin/auctions'; // Redirect to auctions list
+              window.location.href = '/view-auctions'; // Redirect to auctions list
             }, 2000);
           } else {
             showError(data.message || 'Failed to create auction');

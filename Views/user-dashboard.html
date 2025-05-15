@@ -35,14 +35,19 @@
   <aside class="sidebar pt-4" id="sidebar">
     <ul class="sidebar-menu">
       <li>
-        <a href="#" class="active">
+        <a href="/dashboard" class="active">
           <i class="fas fa-tachometer-alt"></i> Dashboard
         </a>
       </li>
-      
+      <li>
+        <a href="/auctions" class="profile-link">
+            <i class="fas fa-gavel"></i> Auctions
+          </a>
+      </li>
+      <li>
         <a href="#" class="profile-link">
-          <i class="fas fa-user-circle"></i> My Profile
-        </a>
+            <i class="fas fa-user-circle"></i> My Profile
+          </a>
       </li>
     
       <li>
@@ -521,6 +526,39 @@
   </footer>
 
   <script>
+
+    // Logout
+    async function logout() {
+        if(!confirm("Are you sure you want to Logout")) return;
+        try {
+            const response = await fetch("http://localhost:3000/api/auth/logout");
+            
+            if (!response.ok) {
+                throw new Error(`Logout failed with status: ${response.status}`);
+            }
+            let data = await response.json();
+            console.log(data.message);
+            localStorage.clear();
+            
+            
+            window.location.href = "/";
+        } catch (error) {
+            alert("Error logging out: " + error.message);
+            console.error("Logout error:", error);
+        }
+    }
+
+    const logoutLink = document.querySelector('.logout-link');
+
+    
+    if (logoutLink) {
+        logoutLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            logout();
+        });
+    } else {
+        console.error("Logout link not found");
+    }
     // Toggle sidebar
     document.getElementById('menuToggle').addEventListener('click', function() {
       document.getElementById('sidebar').classList.toggle('sidebar-collapsed');

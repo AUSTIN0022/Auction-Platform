@@ -26,6 +26,8 @@ try {
   process.exit(1);
 }
 
+// import './utils/worker/updateAuctionsStatus.js';
+
 // Frontend
 app.use('/', frontendRoutes);
 

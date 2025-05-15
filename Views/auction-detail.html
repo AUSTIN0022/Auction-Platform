@@ -6,7 +6,6 @@
   <title>Auction Detail</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link rel="stylesheet" href="/css/style.css">
   <style>
     :root {
       --bs-primary: #3a86ff;
@@ -14,6 +13,7 @@
       --bs-success: #38b000;
       --bs-warning: #ffbe0b;
       --bs-danger: #ff5400;
+      --bs-dark: #1a2639;
     }
     
     body {
@@ -24,6 +24,7 @@
       height: 350px;
       background-position: center;
       background-size: cover;
+      background-repeat: no-repeat;
       border-radius: 0.5rem;
     }
     
@@ -37,6 +38,7 @@
       height: 100px;
       background-position: center;
       background-size: cover;
+      background-repeat: no-repeat;
       border-radius: 0.5rem;
       cursor: pointer;
       transition: all 0.3s ease;
@@ -74,6 +76,22 @@
       background-color: var(--bs-success);
     }
     
+    .status-upcoming {
+      background-color: var(--bs-primary);
+    }
+    
+    .status-ended {
+      background-color: var(--bs-secondary);
+    }
+    
+    .status-draft {
+      background-color: var(--bs-dark);
+    }
+    
+    .status-pending {
+      background-color: var(--bs-warning);
+    }
+    
     .status-verified {
       background-color: rgba(56, 176, 0, 0.1);
       color: var(--bs-success);
@@ -82,6 +100,15 @@
     .timer-display {
       color: var(--bs-warning);
       font-weight: 600;
+    }
+    
+    .loading-spinner {
+      width: 3rem;
+      height: 3rem;
+    }
+    
+    #auctionContainer {
+      min-height: 60vh;
     }
     
     /* Animation for fade in */
@@ -104,153 +131,124 @@
 </head>
 <body>
   <div class="container py-4">
-    <!-- Auction Detail Page -->
-    <div class="card shadow-sm mb-4 fade-in">
-      <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
-        <div><i class="fas fa-gavel"></i> Auction Detail</div>
-        <div>
-          <button class="btn btn-primary"><i class="fas fa-arrow-left me-2"></i> Back</button>
-        </div>
+    <!-- Loading spinner -->
+    <div id="loadingSpinner" class="text-center py-5">
+      <div class="spinner-border loading-spinner text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
       </div>
-      <div class="card-body">
-        <div class="row g-4">
-          <!-- Left Column - Item Details -->
-          <div class="col-lg-8">
-            <div class="row mb-4">
-              <div class="col-md-9">
-                <div class="main-image mb-3 shadow-sm" style="background-image: url('/api/placeholder/500/300')"></div>
-              </div>
-              <div class="col-md-3">
-                <div class="thumbnail-container h-100">
-                  <div class="thumbnail shadow-sm" style="background-image: url('/api/placeholder/120/80')"></div>
-                  <div class="thumbnail shadow-sm" style="background-image: url('/api/placeholder/120/80')"></div>
-                  <div class="thumbnail shadow-sm" style="background-image: url('/api/placeholder/120/80')"></div>
-                </div>
-              </div>
-            </div>
-            
-            <h2 class="mb-3">2019 Honda City VX - 45,000 km</h2>
-            <div class="d-flex align-items-center mb-4">
-              <span class="status-badge status-active">Active</span>
-              <span class="ms-3 timer-display d-flex align-items-center">
-                <i class="fas fa-clock me-2"></i> Ends in: 23:45:12
-              </span>
-            </div>
-            
-            <div class="mb-4">
-              <h3 class="mb-3"><i class="fas fa-align-left text-primary me-2"></i> Description</h3>
-              <p class="text-secondary">Single owner 2019 Honda City VX variant with premium white pearl color. The car has been meticulously maintained with regular service history at authorized Honda service center. Features include leather seats, sunroof, push-button start, cruise control, and more.</p>
-              
-              <h3 class="mt-4 mb-3"><i class="fas fa-list-ul text-primary me-2"></i> Specifications</h3>
-              <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                  <tbody>
-                    <tr>
-                      <td class="table-light fw-bold" style="width: 40%;">Make & Model</td>
-                      <td>Honda City VX</td>
-                    </tr>
-                    <tr>
-                      <td class="table-light fw-bold">Year</td>
-                      <td>2019</td>
-                    </tr>
-                    <tr>
-                      <td class="table-light fw-bold">Kilometers</td>
-                      <td>45,000</td>
-                    </tr>
-                    <tr>
-                      <td class="table-light fw-bold">Fuel Type</td>
-                      <td>Petrol</td>
-                    </tr>
-                    <tr>
-                      <td class="table-light fw-bold">Transmission</td>
-                      <td>Automatic</td>
-                    </tr>
-                    <tr>
-                      <td class="table-light fw-bold">Color</td>
-                      <td>White Pearl</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
+      <p class="mt-3">Loading auction details...</p>
+    </div>
+    
+    <!-- Error message -->
+    <div id="errorMessage" class="alert alert-danger fade-in my-4 d-none" role="alert">
+      <i class="fas fa-exclamation-triangle me-2"></i>
+      <span id="errorText">Failed to load auction details. Please try again.</span>
+    </div>
+    
+    <!-- Auction Detail Page -->
+    <div id="auctionContainer" class="d-none">
+      <div class="card shadow-sm mb-4 fade-in">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center py-3">
+          <div><i class="fas fa-gavel"></i> Auction Detail</div>
+          <div>
+            <button class="btn btn-primary" onclick="window.location.href='/view-auctions'">
+              <i class="fas fa-arrow-left me-2"></i> Back to Auctions
+            </button>
           </div>
-          
-          <!-- Right Column - Bidding Section -->
-          <div class="col-lg-4">
-            <div class="card shadow-sm h-100">
-              <div class="card-body">
-                <div class="fs-3 fw-bold text-secondary mb-1">Current Bid: ₹5,75,000</div>
-                <div class="text-muted mb-4 small">Base Price: ₹5,00,000</div>
-                
-                <div class="bg-light p-3 rounded mb-4">
-                  <div class="d-flex justify-content-between mb-2">
-                    <div>Total Bids:</div>
-                    <div class="fw-bold">32</div>
-                  </div>
-                  <div class="d-flex justify-content-between mb-2">
-                    <div>Registration Fee:</div>
-                    <div class="fw-bold">₹5,000</div>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <div>Time Remaining:</div>
-                    <div class="fw-bold text-warning">23:45:12</div>
+        </div>
+        <div class="card-body">
+          <div class="row g-4">
+            <!-- Left Column - Item Details -->
+            <div class="col-lg-8">
+              <div class="row mb-4">
+                <div class="col-md-9">
+                  <div id="mainImage" class="main-image mb-3 shadow-sm"></div>
+                </div>
+                <div class="col-md-3">
+                  <div id="thumbnailContainer" class="thumbnail-container h-100">
+                    <!-- Thumbnails will be added here -->
                   </div>
                 </div>
+              </div>
+              
+              <h2 id="auctionTitle" class="mb-3"></h2>
+              <div class="d-flex align-items-center mb-4">
+                <span id="statusBadge" class="status-badge"></span>
+                <span id="timerDisplay" class="ms-3 timer-display d-flex align-items-center">
+                  <i class="fas fa-clock me-2"></i> <span id="timeRemaining"></span>
+                </span>
+              </div>
+              
+              <div class="mb-4">
+                <h3 class="mb-3"><i class="fas fa-align-left text-primary me-2"></i> Description</h3>
+                <p id="auctionDescription" class="text-secondary"></p>
                 
-                <div class="border-top pt-4 mb-4">
-                  <div class="status-verified text-center p-3 rounded mb-3">
-                    <i class="fas fa-check-circle fs-4 mb-2"></i>
-                    <div class="fw-bold mb-1">Registered for this Auction</div>
-                    <div class="small">You can place bids on this item</div>
-                  </div>
-                  
-                  <div class="input-group mb-2">
-                    <input type="text" class="form-control" placeholder="Enter amount (₹)" value="5,80,000">
-                    <button class="btn btn-success"><i class="fas fa-gavel me-2"></i> Place Bid</button>
-                  </div>
-                  
-                  <div class="text-center text-muted small">
-                    Minimum increment: ₹5,000
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 class="mb-3 d-flex align-items-center">
-                    <i class="fas fa-history text-primary me-2"></i> Bid History
-                  </h4>
-                  <div class="table-responsive">
-                    <table class="table table-sm">
-                      <tbody>
-                        <tr>
-                          <td>user456</td>
-                          <td class="text-end fw-bold">₹5,75,000</td>
-                          <td class="text-end text-muted">2h ago</td>
-                        </tr>
-                        <tr>
-                          <td>user789</td>
-                          <td class="text-end fw-bold">₹5,70,000</td>
-                          <td class="text-end text-muted">3h ago</td>
-                        </tr>
-                        <tr>
-                          <td>user234</td>
-                          <td class="text-end fw-bold">₹5,65,000</td>
-                          <td class="text-end text-muted">5h ago</td>
-                        </tr>
-                        <tr>
-                          <td>user567</td>
-                          <td class="text-end fw-bold">₹5,60,000</td>
-                          <td class="text-end text-muted">6h ago</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
+                <h3 class="mt-4 mb-3"><i class="fas fa-list-ul text-primary me-2"></i> Details</h3>
+                <div class="table-responsive">
+                  <table class="table table-bordered table-hover">
+                    <tbody id="detailsTable">
+                      <!-- Details will be added here -->
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
             
-            <div class="text-center mt-3">
-              <button class="btn btn-light me-2"><i class="fas fa-flag me-2"></i> Report Issue</button>
-              <button class="btn btn-light"><i class="fas fa-share-alt me-2"></i> Share</button>
+            <!-- Right Column - Bidding Section -->
+            <div class="col-lg-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body">
+                  <div class="fs-3 fw-bold text-secondary mb-1">Current Bid: <span id="currentBid"></span></div>
+                  <div class="text-muted mb-4 small">Base Price: <span id="basePrice"></span></div>
+                  
+                  <div class="bg-light p-3 rounded mb-4">
+                    <div class="d-flex justify-content-between mb-2">
+                      <div>Total Bids:</div>
+                      <div id="totalBids" class="fw-bold">0</div>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                      <div>EMD Amount:</div>
+                      <div id="emdAmount" class="fw-bold"></div>
+                    </div>
+                    <div class="d-flex justify-content-between">
+                      <div>Time Remaining:</div>
+                      <div id="timeRemainingBottom" class="fw-bold text-warning"></div>
+                    </div>
+                  </div>
+                  
+                  <div class="border-top pt-4 mb-4">
+                    <div id="statusMessageContainer" class="text-center p-3 rounded mb-3">
+                      <!-- Status message will be added here -->
+                    </div>
+                    
+                    <div id="bidFormContainer">
+                      <!-- Bid form will be added here depending on auction status -->
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h4 class="mb-3 d-flex align-items-center">
+                      <i class="fas fa-history text-primary me-2"></i> Bid History
+                    </h4>
+                    <div class="table-responsive">
+                      <table class="table table-sm">
+                        <tbody id="bidHistoryContainer">
+                          <!-- Bid history will be added here -->
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="text-center mt-3">
+                <button class="btn btn-light me-2">
+                  <i class="fas fa-flag me-2"></i> Report Issue
+                </button>
+                <button class="btn btn-light" onclick="shareAuction()">
+                  <i class="fas fa-share-alt me-2"></i> Share
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -260,5 +258,344 @@
 
   <!-- Bootstrap JS Bundle with Popper -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Get auction ID from URL
+    function getAuctionIdFromUrl() {
+      const pathSegments = window.location.pathname.split('/');
+      return pathSegments[pathSegments.length - 1];
+    }
+    
+    // Format price with Indian Rupee symbol
+    function formatPrice(price) {
+      return new Intl.NumberFormat('en-IN', {
+        style: 'currency',
+        currency: 'INR',
+        maximumFractionDigits: 0
+      }).format(price);
+    }
+    
+    // Format date in a readable format
+    function formatDate(dateString) {
+      const options = { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      };
+      return new Date(dateString).toLocaleDateString('en-IN', options);
+    }
+    
+    // Calculate time remaining until a specific date
+    function calculateTimeRemaining(endDate) {
+      const now = new Date();
+      const end = new Date(endDate);
+      const diff = end - now;
+      
+      if (diff <= 0) {
+        return "Auction ended";
+      }
+      
+      // Calculate days, hours, minutes, seconds
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      
+      if (days > 0) {
+        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      } else {
+        return `${hours}h ${minutes}m ${seconds}s`;
+      }
+    }
+    
+    // Update countdown timer
+    function updateTimer(endDate) {
+      const timeRemainingElements = [
+        document.getElementById('timeRemaining'),
+        document.getElementById('timeRemainingBottom')
+      ];
+      
+      const updateTimerDisplay = () => {
+        const timeRemaining = calculateTimeRemaining(endDate);
+        timeRemainingElements.forEach(element => {
+          if (element) element.textContent = timeRemaining;
+        });
+      };
+      
+      // Update immediately then set interval
+      updateTimerDisplay();
+      return setInterval(updateTimerDisplay, 1000);
+    }
+    
+    // Change main image when thumbnail is clicked
+    function setupImageGallery(images) {
+      const mainImage = document.getElementById('mainImage');
+      const thumbnailContainer = document.getElementById('thumbnailContainer');
+      
+      // Clear any existing thumbnails
+      thumbnailContainer.innerHTML = '';
+      
+      // Set main image to first image
+      if (images && images.length > 0) {
+        mainImage.style.backgroundImage = `url('${images[0]}')`;
+        
+        // Add thumbnails
+        images.forEach((imageUrl, index) => {
+          const thumbnail = document.createElement('div');
+          thumbnail.className = 'thumbnail shadow-sm';
+          thumbnail.style.backgroundImage = `url('${imageUrl}')`;
+          thumbnail.onclick = () => {
+            mainImage.style.backgroundImage = `url('${imageUrl}')`;
+          };
+          thumbnailContainer.appendChild(thumbnail);
+        });
+      } else {
+        // Use placeholder if no images
+        mainImage.style.backgroundImage = "url('/api/placeholder/500/300')";
+        
+        // Add placeholder thumbnails
+        for (let i = 0; i < 3; i++) {
+          const thumbnail = document.createElement('div');
+          thumbnail.className = 'thumbnail shadow-sm';
+          thumbnail.style.backgroundImage = "url('/api/placeholder/120/80')";
+          thumbnailContainer.appendChild(thumbnail);
+        }
+      }
+    }
+    
+    // Get status badge class based on status
+    function getStatusBadgeClass(status) {
+      switch(status.toLowerCase()) {
+        case 'active':
+          return 'status-active';
+        case 'upcoming':
+          return 'status-upcoming';
+        case 'ended':
+          return 'status-ended';
+        case 'draft':
+          return 'status-draft';
+        case 'pending':
+          return 'status-pending';
+        default:
+          return 'status-draft';
+      }
+    }
+    
+    // Set up bid form based on auction status
+    function setupBidForm(auction) {
+      const bidFormContainer = document.getElementById('bidFormContainer');
+      const statusMessageContainer = document.getElementById('statusMessageContainer');
+      
+      // Clear containers
+      bidFormContainer.innerHTML = '';
+      statusMessageContainer.innerHTML = '';
+      
+      // Check status and setup appropriate UI
+      const status = auction.status.toLowerCase();
+      
+      if (status === 'active') {
+        // Show registration status (assuming user is registered for simplicity)
+        statusMessageContainer.className = 'status-verified text-center p-3 rounded mb-3';
+        statusMessageContainer.innerHTML = `
+          <i class="fas fa-check-circle fs-4 mb-2"></i>
+          <div class="fw-bold mb-1">Registered for this Auction</div>
+          <div class="small">You can place bids on this item</div>
+        `;
+        
+        // Show bid form
+        bidFormContainer.innerHTML = `
+          <div class="input-group mb-2">
+            <input type="text" class="form-control" placeholder="Enter amount (₹)" 
+                   value="${formatPrice(auction.basePrice).replace('₹', '')}">
+            <button class="btn btn-success"><i class="fas fa-gavel me-2"></i> Place Bid</button>
+          </div>
+          <div class="text-center text-muted small">
+            Minimum increment: ₹1,000
+          </div>
+        `;
+      } else if (status === 'upcoming') {
+        statusMessageContainer.className = 'bg-primary bg-opacity-10 text-primary text-center p-3 rounded mb-3';
+        statusMessageContainer.innerHTML = `
+          <i class="fas fa-calendar-alt fs-4 mb-2"></i>
+          <div class="fw-bold mb-1">Upcoming Auction</div>
+          <div class="small">Registration open until ${formatDate(auction.registrationDeadline)}</div>
+        `;
+        
+        bidFormContainer.innerHTML = `
+          <button class="btn btn-primary w-100">
+            <i class="fas fa-user-plus me-2"></i> Register for this Auction
+          </button>
+        `;
+      } else if (status === 'draft') {
+        statusMessageContainer.className = 'bg-dark bg-opacity-10 text-dark text-center p-3 rounded mb-3';
+        statusMessageContainer.innerHTML = `
+          <i class="fas fa-pencil-alt fs-4 mb-2"></i>
+          <div class="fw-bold mb-1">Draft Auction</div>
+          <div class="small">This auction is not yet published</div>
+        `;
+        
+        bidFormContainer.innerHTML = `
+          <button class="btn btn-secondary w-100">
+            <i class="fas fa-paper-plane me-2"></i> Publish Auction
+          </button>
+        `;
+      } else {
+        statusMessageContainer.className = 'bg-secsondary bg-opacity-10 text-secondary text-center p-3 rounded mb-3';
+        statusMessageContainer.innerHTML = `
+          <i class="fas fa-info-circle fs-4 mb-2"></i>
+          <div class="fw-bold mb-1">${status.charAt(0).toUpperCase() + status.slice(1)} Auction</div>
+          <div class="small">Bidding is not available</div>
+        `;
+      }
+    }
+    
+    // Share auction function
+    function shareAuction() {
+      if (navigator.share) {
+        navigator.share({
+          title: document.getElementById('auctionTitle').textContent,
+          url: window.location.href
+        }).catch(err => {
+          console.error('Error sharing:', err);
+        });
+      } else {
+        // Fallback
+        const dummy = document.createElement('input');
+        document.body.appendChild(dummy);
+        dummy.value = window.location.href;
+        dummy.select();
+        document.execCommand('copy');
+        document.body.removeChild(dummy);
+        alert('Auction link copied to clipboard!');
+      }
+    }
+    
+    // Display auction details
+    function displayAuctionDetails(auction) {
+      // Hide loading spinner and show auction container
+      document.getElementById('loadingSpinner').classList.add('d-none');
+      document.getElementById('auctionContainer').classList.remove('d-none');
+      
+      // Set title and description
+      document.getElementById('auctionTitle').textContent = auction.title;
+      document.getElementById('auctionDescription').textContent = auction.description;
+      
+      // Set status badge
+      const statusBadge = document.getElementById('statusBadge');
+      statusBadge.textContent = auction.status.charAt(0).toUpperCase() + auction.status.slice(1);
+      statusBadge.className = `status-badge ${getStatusBadgeClass(auction.status)}`;
+      
+      // Set prices
+      document.getElementById('basePrice').textContent = formatPrice(auction.basePrice);
+      document.getElementById('currentBid').textContent = formatPrice(auction.basePrice); // Using base price as current bid if no bids
+      document.getElementById('emdAmount').textContent = formatPrice(auction.emdAmount);
+      
+      // Set total bids
+      document.getElementById('totalBids').textContent = auction.bidLog ? auction.bidLog.length : 0;
+      
+      // Setup image gallery
+      setupImageGallery(auction.images);
+      
+      // Setup countdown timer
+      let timerInterval = updateTimer(auction.endDate);
+      
+      // Setup details table
+      const detailsTable = document.getElementById('detailsTable');
+      detailsTable.innerHTML = `
+        <tr>
+          <td class="table-light fw-bold" style="width: 40%;">Auction ID</td>
+          <td>${auction._id}</td>
+        </tr>
+        <tr>
+          <td class="table-light fw-bold">Start Date</td>
+          <td>${formatDate(auction.startDate)}</td>
+        </tr>
+        <tr>
+          <td class="table-light fw-bold">End Date</td>
+          <td>${formatDate(auction.endDate)}</td>
+        </tr>
+        <tr>
+          <td class="table-light fw-bold">Registration Deadline</td>
+          <td>${formatDate(auction.registrationDeadline)}</td>
+        </tr>
+        <tr>
+          <td class="table-light fw-bold">EMD Amount</td>
+          <td>${formatPrice(auction.emdAmount)}</td>
+        </tr>
+        <tr>
+          <td class="table-light fw-bold">Status</td>
+          <td>${auction.status.charAt(0).toUpperCase() + auction.status.slice(1)}</td>
+        </tr>
+      `;
+      
+      // Setup bid form based on auction status
+      setupBidForm(auction);
+      
+      // Setup bid history
+      const bidHistoryContainer = document.getElementById('bidHistoryContainer');
+      if (auction.bidLog && auction.bidLog.length > 0) {
+        let bidHistoryHTML = '';
+        auction.bidLog.forEach(bid => {
+          bidHistoryHTML += `
+            <tr>
+              <td>${bid.bidder}</td>
+              <td class="text-end fw-bold">${formatPrice(bid.amount)}</td>
+              <td class="text-end text-muted">${new Date(bid.timestamp).toLocaleTimeString()}</td>
+            </tr>
+          `;
+        });
+        bidHistoryContainer.innerHTML = bidHistoryHTML;
+      } else {
+        bidHistoryContainer.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No bids yet</td></tr>';
+      }
+      
+      // Return the timer interval for cleanup
+      return timerInterval;
+    }
+    
+    // Fetch auction details from API
+    function fetchAuctionDetails() {
+      const auctionId = getAuctionIdFromUrl();
+      let timerInterval;
+      
+      fetch(`http://localhost:3000/api/admin/auction/${auctionId}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.auctionDetails) {
+            // Update document title with auction name
+            document.title = `${data.auctionDetails.title} - Auction Detail`;
+            
+            // Display auction details
+            timerInterval = displayAuctionDetails(data.auctionDetails);
+          } else {
+            // Show error message
+            document.getElementById('loadingSpinner').classList.add('d-none');
+            document.getElementById('errorMessage').classList.remove('d-none');
+            document.getElementById('errorText').textContent = data.message || 'Failed to load auction details.';
+          }
+        })
+        .catch(error => {
+          console.error('Error fetching auction details:', error);
+          document.getElementById('loadingSpinner').classList.add('d-none');
+          document.getElementById('errorMessage').classList.remove('d-none');
+          document.getElementById('errorText').textContent = 'Failed to connect to the server. Please try again.';
+        });
+      
+      // Cleanup function for timer
+      return () => {
+        if (timerInterval) clearInterval(timerInterval);
+      };
+    }
+    
+    // Run when the document is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      const cleanup = fetchAuctionDetails();
+      
+      // Clean up timers when page is unloaded
+      window.addEventListener('beforeunload', cleanup);
+    });
+  </script>
 </body>
 </html>
