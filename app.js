@@ -6,6 +6,7 @@ import adminAuctionRoutes from './routes/admin/auctionRoutes.js';
 import adminUserRoutes from './routes/admin/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import frontendRoutes from './routes/frontendRoutes.js';
+import userAuctionRoutes from './routes/user/auctionRoutes.js';
 
 dotenv.config();
 const app = express();
@@ -33,9 +34,13 @@ app.use('/', frontendRoutes);
 
 
 // Backend
+// Admin
 app.use('/api/auth', authRoutes);
 app.use('/api/admin/users', adminUserRoutes);
 app.use('/api/admin/auction', adminAuctionRoutes);
+
+// User
+app.use('/api/auctions', userAuctionRoutes);
 
 
 app.listen(process.env.PORT, () => {
