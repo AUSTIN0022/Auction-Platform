@@ -189,6 +189,7 @@
             
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
+            localStorage.setItem('userId', JSON.stringify(data.userId));
             
             setTimeout(() => {
               const role = data.user.role;

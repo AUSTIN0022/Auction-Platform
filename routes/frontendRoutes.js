@@ -38,12 +38,6 @@ router.get('/create-auction', isLoggedIn,  authorizeRole('admin'), (req, res) =>
     res.sendFile(path.join(__dirname, '../views/create-auction.html'));
 });
 
-router.get('/view-auctions', isLoggedIn,  authorizeRole('admin'), (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/view-auctions.html'));
-});
-router.get('/auctions/:id', isLoggedIn,  authorizeRole('admin'), (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/auction-detail.html'));
-});
 
 router.get('/user-detail/:id', isLoggedIn, authorizeRole('admin'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/userDetails.html'));
@@ -61,14 +55,22 @@ router.get('/user-verification', isLoggedIn, authorizeRole('admin'), (req, res) 
 router.get('/dashboard', isLoggedIn, authorizeRole('user'), (req, res) => {
     res.sendFile(path.join(__dirname, '../views/user-dashboard.html'));
 });
+router.get('/auctions', isLoggedIn, authorizeRole('user'), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/browseAuctions.html'));
+});
+// router.get('/auctions/:id', isLoggedIn, authorizeRole('user'), (req, res) => {
+//     res.sendFile(path.join(__dirname, '../views/viewAuctionDetails.html'));
+// });
 
 // Both Admin & User
-router.get('/auction-detail', isLoggedIn, authorizeRole(['admin', 'user']), (req, res) => {
-    res.sendFile(path.join(__dirname, '../views/auction-detail.html'));
+
+router.get('/view-auctions', isLoggedIn,  authorizeRole(['admin','user']), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/view-auctions.html'));
 });
 
-
-
+router.get('/auctions/:id', isLoggedIn,  authorizeRole(['admin','user']), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/auction-detail.html'));
+});
 
 // Error page route
 router.get('/error', (req, res) => {

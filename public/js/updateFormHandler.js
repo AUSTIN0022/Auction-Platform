@@ -410,7 +410,7 @@ function submitForm(status) {
   formData.append('registrationDeadline', registrationDeadlineTime);
   formData.append('status', status);
   formData.append('categorie', categoryId);
-  formData.append('createdBy', userId);
+  formData.append('createdBy', userId.replace(/^"|"$/g, ''));
   
   // Add images to remove
   if (imagesToRemove.length > 0) {

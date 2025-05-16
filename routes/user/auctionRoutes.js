@@ -10,11 +10,13 @@ import { authorizeRole } from '../../middleware/authorizeRole.js';
 import { isLoggedIn } from '../../middleware/isLoggedIn.js';
 
 const router = express.Router();
+
+router.get('/', isLoggedIn, browseAuctions);
+
 router.use(isLoggedIn, authorizeRole('user'));
 
-router.get('/', browseAuctions);
-router.get('/:id', viewAuctionDetails);
 router.get('/participating', getParticipatingAuctions);
+router.get('/:id', viewAuctionDetails);
 router.post('/:id/register', registerForAuction);
 router.post('/:id/emd/pay', payEmd);
 

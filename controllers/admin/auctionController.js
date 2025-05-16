@@ -187,7 +187,17 @@ export const getAuctionById = async (req, res) => {
         });
     }
     try {
-        const auctionDetails = await Auction.findById({_id: auctionId});
+        const auctionDetails = await Auction.findById({ _id: auctionId })
+                .select('-__v -updatedAt -createdAt -isDeleted -deletedAt')
+                .populate({
+                    path: 'bidders',
+                    select: '-wallet -password -address -idProof -profileImage -mobile -email -__v -createdAt -updatedAt -isDeleted -deletedAt'
+                })
+                .populate({
+                    path: 'bidLog',
+                    select: '-__v -updatedAt -isDeleted -deletedAt'
+                });
+
 
         if(!auctionDetails) {
             return res.status(404).json({
@@ -195,7 +205,7 @@ export const getAuctionById = async (req, res) => {
                 message: `Could not find Auction`
             });
         }
-
+        
         return res.json({
             success: true,
             message: 'Auctions found',
@@ -212,11 +222,20 @@ export const getAuctionById = async (req, res) => {
 }
 
 export const updateAuctions = async (req, res) => {
-    let {auctionId, title, description, basePrice, startDate, endDate, registrationDeadline, emdAmount, status, categorie, createdBy,} = req.body;
+    let {auctionId, title, description, basePrice, startDate, endDate, registrationDeadline, emdAmount, status, categorie,existingImages, createdBy,} = req.body;
     console.log("Request in backend controller");
     try{
-        const images = req.files ? req.files.map(file => file.path): [];
+        let existingImagesArray = [];
+        if (existingImages) {
+            try {
+                existingImagesArray = JSON.parse(existingImages);
+            } catch (e) {
+                console.error("Error parsing existingImages:", e);
+            }
+        }
 
+        const newImages  = req.files ? req.files.map(file => file.path): [];
+        const combinedImages = [...existingImagesArray, ...newImages];
         const requiredFields = { title, description, basePrice, startDate, endDate, registrationDeadline, emdAmount, status, categorie, createdBy };
 
         const missingFields = Object.entries(requiredFields)
@@ -229,14 +248,13 @@ export const updateAuctions = async (req, res) => {
                 message: `Missing required fields: ${missingFields.join(', ')}`
             })
         }
-        console.log(images);
-        if(!images || images.length < 2){
+        console.log(combinedImages);
+        if(combinedImages.length < 2){
             return res.status(400).json({
                 success: false,
-                message: " Please upload at least 2 images"
+                message: "Please upload at least 2 images in total (existing + new)"
             });
         }
-        
         basePrice = parseInt(basePrice);
         if(typeof basePrice !== 'number' || basePrice <= 0) {
             return res.status(400).json({
@@ -297,7 +315,7 @@ export const updateAuctions = async (req, res) => {
         const newAuction = {
             title: title.trim(),
             description: description.trim(),
-            images, 
+            images: combinedImages, 
             basePrice: Number(basePrice),
             startDate: parsedStartDate,
             endDate: parsedEndDate,
@@ -346,6 +364,7 @@ export const updateAuctions = async (req, res) => {
         });
     }
 }
+
 export const deleteAuctions = async (req, res) => {
     const  auctionId  = req.params.id;
 
