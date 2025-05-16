@@ -447,7 +447,7 @@
         // Create FormData to send
         const formData = new FormData();
         
-        // Get form values
+      
         const categoryId = document.getElementById('itemCategory').value;
         const title = document.getElementById('itemTitle').value;
         const description = document.getElementById('description').value;
@@ -457,15 +457,13 @@
         const endDate = document.getElementById('endDate').value;
         const registrationDeadline = document.getElementById('registrationDeadline').value;
         
-        // Get user ID from localStorage
         const userId = localStorage.getItem('userId') || "67697d43d1df912d7ac760af"; // Fallback for testing
         
-        // Format dates properly with timezone
+        
         const startDateTime = new Date(startDate).toISOString();
         const endDateTime = new Date(endDate).toISOString();
         const registrationDeadlineTime = new Date(registrationDeadline).toISOString();
         
-        // Add form fields to FormData
         formData.append('title', title);
         formData.append('description', description);
         formData.append('basePrice', parseInt(basePrice));
