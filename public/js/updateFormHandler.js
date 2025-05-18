@@ -56,7 +56,13 @@ function fetchAuctionData() {
     
     showLoading();
     
-    fetch(`http://localhost:3000/api/admin/auction/${auctionId}`)
+    fetch(`/api/admin/auction/${auctionId}`, {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
       .then(response => response.json())
       .then(data => {
         hideLoading();
@@ -172,7 +178,13 @@ function updateExistingImagesPreview() {
  * Fetch categories from the API and populate the dropdown
  */
 function fetchCategories() {
-  fetch('http://localhost:3000/api/admin/auction/categories')
+  fetch('/api/admin/auction/categories', {
+    method: 'GET',
+    credentials: 'include',
+    headers: {
+        'Content-Type': 'application/json'
+    }
+})
     .then(response => response.json())
     .then(data => {
       if (data.success && data.categories) {
@@ -433,9 +445,10 @@ function submitForm(status) {
 
   
   // Send the request
-  fetch(`http://localhost:3000/api/admin/auction/${auctionId}`, {
+  fetch(`/api/admin/auction/${auctionId}`, {
     method: 'PUT',
     body: formData,
+    credentials: 'include',
     headers: {
       // Don't set Content-Type when using FormData
       'Authorization': `Bearer ${localStorage.getItem('token') || 'dummy-token'}`

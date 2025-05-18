@@ -23,6 +23,11 @@ export const getAuctionsCategories = async (req, res) => {
 export const createAuction = async (req, res) => {
     let { title, description, basePrice, startDate, endDate, registrationDeadline, emdAmount, status, categorie, createdBy,} = req.body;
     console.log("Request in backend controller");
+    console.log(`creadeBy: ${createdBy} Typeof: ${typeof createdBy}`);
+    // Clean up createdBy - remove any extra quotation marks
+if (typeof createdBy === 'string') {
+    createdBy = createdBy.replace(/^"|"$/g, '');
+}
     try{
         const images = req.files ? req.files.map(file => file.path): [];
 
@@ -35,7 +40,7 @@ export const createAuction = async (req, res) => {
         if(missingFields.length > 0) {
             return res.status(400).json({
                 success: false,
-                message: `Missing required fields: ${missingFields.json(', ')}`
+                message: `Missing required fields: ${missingFields.join(', ')}`
             })
         }
         console.log(images);

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auction Payment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .auction-details {
+            margin-bottom: 30px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+        .auction-details p {
+            margin: 5px 0;
+        }
+        .price {
+            font-weight: bold;
+            color: #2980b9;
+            font-size: 24px;
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .btn-cancel {
+            background: #e74c3c;
+            margin-left: 10px;
+        }
+        .btn-cancel:hover {
+            background: #c0392b;
+        }
+        .loader {
+            display: none;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .info-box {
+            margin-top: 30px;
+            padding: 15px;
+            background: #e8f4fd;
+            border-left: 4px solid #3498db;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 id="payment-title">Auction Payment</h1>
+        
+        <div class="auction-details">
+            <h2 id="auction-title">Loading auction details...</h2>
+            <p id="auction-description"></p>
+            <p><strong>Payment Type:</strong> <span id="payment-type"></span></p>
+            <p><strong>Amount:</strong> <span id="payment-amount" class="price"></span></p>
+        </div>
+        
+        <button id="pay-button" class="btn" onclick="proceedToPayment()">Proceed to Payment</button>
+        <a href="#" id="cancel-link" class="btn btn-cancel" onclick="cancelAndGoBack()">Cancel</a>
+        
+        <div id="payment-loader" class="loader"></div>
+        <div id="payment-status" class="status"></div>
+        
+        <div class="info-box">
+            <h3>Important Information</h3>
+            <p id="payment-info">You will be redirected to Razorpay's secure payment gateway to complete your payment.</p>
+            <p id="emd-info" style="display: none;">The EMD amount is refundable if you do not win the auction.</p>
+            <p id="final-info" style="display: none;">This final payment will complete your purchase of the auction item.</p>
+        </div>
+    </div>
+
+    <!-- Razorpay SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    
+    <!-- Custom Scripts -->
+    <script src="/js/checkout.js"></script>
+    <script>
+        // Get query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const auctionId = urlParams.get('auctionId');
+        const paymentType = urlParams.get('type'); // 'emd' or 'final'
+        
+        // Elements
+        const paymentTitle = document.getElementById('payment-title');
+        const auctionTitle = document.getElementById('auction-title');
+        const auctionDescription = document.getElementById('auction-description');
+        const paymentTypeEl = document.getElementById('payment-type');
+        const paymentAmount = document.getElementById('payment-amount');
+        const emdInfo = document.getElementById('emd-info');
+        const finalInfo = document.getElementById('final-info');
+        const paymentInfo = document.getElementById('payment-info');
+        
+        // On page load, fetch auction details
+        document.addEventListener('DOMContentLoaded', async function() {
+            if (!auctionId || !paymentType) {
+                document.getElementById('payment-status').innerText = 'Missing required parameters';
+                document.getElementById('payment-status').classList.add('error');
+                document.getElementById('pay-button').disabled = true;
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/auctions/${auctionId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('token')}`
+                    }
+                });
+                
+                const data = await response.json();
+                console.log(`Data: ${JSON.stringify(data)}`);
+
+
+                if (!data.success) {
+                    throw new Error(data.message || 'Failed to fetch auction details');
+                }
+                
+                const auction = data.auctionDetails;
+                console.log(auction);
+                
+                // Update UI
+                auctionTitle.innerText = auction.title;
+                auctionDescription.innerText = auction.description;
+                
+                if (paymentType === 'emd') {
+                    paymentTitle.innerText = 'Auction Registration Payment';
+                    paymentTypeEl.innerText = 'EMD (Earnest Money Deposit)';
+                    paymentAmount.innerText = `₹${auction.emdAmount.toFixed(2)}`;
+                    emdInfo.style.display = 'block';
+                    
+                    // Store for payment process
+                    window.paymentDetails = {
+                        amount: auction.emdAmount,
+                        paymentType: 'emd',
+                        auctionId: auctionId,
+                        description: `EMD Payment for ${auction.title}`
+                    };
+                } else if (paymentType === 'final') {
+                    paymentTitle.innerText = 'Auction Final Payment';
+                    paymentTypeEl.innerText = 'Final Payment';
+                    paymentAmount.innerText = `₹${auction.basePrice.toFixed(2)}`;
+                    finalInfo.style.display = 'block';
+                    
+                    // Get final amount from highest bid
+                    if (auction.bidLog && auction.bidLog.length > 0) {
+                        const highestBid = Math.max(...auction.bidLog.map(bid => bid.bidAmount));
+                        paymentAmount.innerText = `₹${highestBid.toFixed(2)}`;
+
+                        console.log(`HighestBid: ${parseFloat(highestBid)}`);
+                        console.log(`Type: ${typeof highestBid}`);
+                        
+                        // Store for payment process
+                        window.paymentDetails = {
+                            amount: highestBid,
+                            paymentType: 'final',
+                            auctionId: auctionId,
+                            description: `Final Payment for ${auction.title}`
+                        };
+                    } else {
+                        window.paymentDetails = {
+                            amount: auction.basePrice,
+                            paymentType: 'final',
+                            auctionId: auctionId,
+                            description: `Final Payment for ${auction.title}`
+                        };
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error fetching auction details:', error);
+                document.getElementById('payment-status').innerText = `Error: ${error.message}`;
+                document.getElementById('payment-status').classList.add('error');
+                document.getElementById('pay-button').disabled = true;
+            }
+        });
+        
+        // Process payment when button is clicked
+        function proceedToPayment() {
+            if (!window.paymentDetails) {
+                document.getElementById('payment-status').innerText = 'Payment details not loaded yet';
+                document.getElementById('payment-status').classList.add('error');
+                return;
+            }
+            
+            // Add redirect URLs
+            window.paymentDetails.redirectSuccess = `/payment-success.html?auctionId=${auctionId}&type=${paymentType}`;
+            window.paymentDetails.redirectFailure = `/payment-failure.html?auctionId=${auctionId}&type=${paymentType}`;
+            
+            // Call the initiatePayment function from checkout.js
+            initiatePayment(window.paymentDetails);
+        }
+        
+        // Cancel and go back function
+        function cancelAndGoBack() {
+            window.history.back();
+        }
+    </script>
+</body>
+</html>

@@ -37,7 +37,13 @@ document.addEventListener('DOMContentLoaded', function() {
   
   async function fetchUsers() {
     try {
-      const response = await fetch('http://localhost:3000/api/admin/users');
+      const response = await fetch('https://dev.bidbazaar.shop/api/admin/users', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
       
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -187,8 +193,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/verify`, {
-            method: "PUT"
+        const response = await fetch(`/api/admin/users/${userId}/verify`, {
+            method: 'PUT',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
         });
         const data = await response.json();
 
@@ -213,9 +223,13 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/reject`, {
-            method: "PUT"
-        });
+        const response = await fetch(`/api/admin/users/${userId}/reject`, {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        } );
         const data = await response.json();
 
         if (!response.ok) {
@@ -236,15 +250,19 @@ document.addEventListener('DOMContentLoaded', function() {
   
   
  window.viewUserDetails = async function(userId) {
-    window.location.href = `http://localhost:3000/user-detail/${userId}`;
+    window.location.href = `/user-detail/${userId}`;
   }
   
 
   window.viewDocuments = async function (userId) {
     try {
-      const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/documents`, {
-        method: "GET"
-      });
+      const response = await fetch(`/api/admin/users/${userId}/documents`,  {
+            method: 'GET',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
       const data = await response.json();
   
       if (!response.ok || !data.document) {

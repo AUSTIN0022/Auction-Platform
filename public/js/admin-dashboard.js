@@ -14,7 +14,14 @@
     async function logout() {
         if(!confirm("Are you sure you want to Logout")) return;
         try {
-            const response = await fetch("http://localhost:3000/api/auth/logout");
+            const response = await fetch("/api/auth/logout", {
+                method: 'GET',
+                credentials: 'include',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
             
             if (!response.ok) {
                 throw new Error(`Logout failed with status: ${response.status}`);

@@ -59,7 +59,13 @@ async function loadUserData() {
     document.getElementById('errorAlert').style.display = 'none';
     
     try {
-    const response = await fetch(`http://localhost:3000/api/admin/users/${userId}`);
+    const response = await fetch(`/api/admin/users/${userId}`,{
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
     
     if (!response.ok) {
         throw new Error(`Failed to fetch user data: ${response.status}`);
@@ -207,8 +213,9 @@ function addButtonEventListeners() {
     // Approve button
     document.getElementById('approveBtn').addEventListener('click', async function() {
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/verify`, {
+        const response = await fetch(`/admin/users/${userId}/verify`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -230,8 +237,9 @@ function addButtonEventListeners() {
     // Reject button
     document.getElementById('rejectBtn').addEventListener('click', async function() {
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/users/${userId}/reject`, {
+        const response = await fetch(`/api/admin/users/${userId}/reject`, {
         method: 'PUT',
+        credentials: 'include',
         headers: {
             'Content-Type': 'application/json'
         },

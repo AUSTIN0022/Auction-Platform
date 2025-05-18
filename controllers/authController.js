@@ -120,6 +120,11 @@ export const login = async (req, res) => {
     }
 };
 export const logout = async (req, res) => {
-    res.clearCookie('authToken');
+    res.clearCookie('authToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'None',
+        path: '/'
+    });
     res.json({ message: "Logout" });
-} 
+}

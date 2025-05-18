@@ -600,7 +600,13 @@ function setupBidForm(auction) {
       const auctionId = getAuctionIdFromUrl();
       let timerInterval;
       
-      fetch(`http://localhost:3000/api/auctions/${auctionId}`)
+      fetch(`/api/auctions/${auctionId}`,  {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
         .then(response => response.json())
         .then(data => {
           if (data.success && data.auctionDetails) {

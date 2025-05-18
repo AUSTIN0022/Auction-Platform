@@ -827,7 +827,13 @@ async function fetchAuctions() {
     console.log("Fetching auctions for role:", user.role);
     
     // Using fetch with error handling
-    const response = await fetch('http://localhost:3000/api/auctions');
+    const response = await fetch('/api/auctions',  {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
     
     if (!response.ok) {
       throw new Error(`API error: ${response.status}`);
@@ -924,7 +930,7 @@ function renderUserAuctions(auctions) {
         statusClass = 'status-upcoming';
         statusText = 'Upcoming';
         actionButton = `
-          <a href="/register-interest/${auction._id}" class="btn btn-register">
+          <a href="/checkout?auctionId=${auction._id}&type=emd" class="btn btn-register">
             <i class="fas fa-bell me-2"></i> Register Interest
           </a>
         `;
@@ -933,7 +939,7 @@ function renderUserAuctions(auctions) {
         statusClass = 'status-completed';
         statusText = 'Completed';
         actionButton = `
-          <a href="/auction-results/${auction._id}" class="btn btn-view">
+          <a href="/auctions/${auction._id}" class="btn btn-view">
             <i class="fas fa-eye me-2"></i> View Results
           </a>
         `;

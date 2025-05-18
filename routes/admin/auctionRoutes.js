@@ -11,8 +11,8 @@ router.use(isLoggedIn, authorizeRole('admin'));
 
 
 router.get('/', getAllAuctions);
-router.get('/categories', getAuctionsCategories);
 router.post('/create', uploadAuctionImages.array('auction_images', 5), createAuction);
+router.get('/categories', getAuctionsCategories);
 router.get('/:id', getAuctionById);
 router.put('/:id', uploadAuctionImages.array('auction_images', 5), updateAuctions);
 router.delete('/:id',deleteAuctions);

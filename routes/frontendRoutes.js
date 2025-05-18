@@ -72,6 +72,20 @@ router.get('/auctions/:id', isLoggedIn,  authorizeRole(['admin','user']), (req, 
     res.sendFile(path.join(__dirname, '../views/auction-detail.html'));
 });
 
+
+// payment
+router.get('/checkout', isLoggedIn,  authorizeRole(['admin','user']), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/checkout.html'));
+});
+
+router.get('/payment-success', isLoggedIn,  authorizeRole(['admin','user']), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/payment-success.html'));
+});
+
+router.get('/payment-failure', isLoggedIn,  authorizeRole(['admin','user']), (req, res) => {
+    res.sendFile(path.join(__dirname, '../views/payment-failure.html'));
+});
+
 // Error page route
 router.get('/error', (req, res) => {
     res.sendFile(path.join(__dirname, '../views/error.html'));

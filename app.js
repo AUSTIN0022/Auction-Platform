@@ -1,4 +1,5 @@
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 import mongoose from 'mongoose';
@@ -6,10 +7,19 @@ import adminAuctionRoutes from './routes/admin/auctionRoutes.js';
 import adminUserRoutes from './routes/admin/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import frontendRoutes from './routes/frontendRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import userAuctionRoutes from './routes/user/auctionRoutes.js';
+
+
 
 dotenv.config();
 const app = express();
+
+
+app.use(cors({
+    origin: 'https://dev.bidbazaar.shop',
+    credentials: true
+  }));
 
 app.use(express.static('views'));
 app.use(express.json());
@@ -33,6 +43,9 @@ try {
 app.use('/', frontendRoutes);
 
 
+// Payment
+app.use('/api/payments', paymentRoutes);
+
 // Backend
 // Admin
 app.use('/api/auth', authRoutes);
@@ -45,4 +58,5 @@ app.use('/api/auctions', userAuctionRoutes);
 
 app.listen(process.env.PORT, () => {
     console.log(`listening on port http://localhost:${process.env.PORT}.....`);
+    console.log("Live on https://dev.bidbazaar.shop");
 });

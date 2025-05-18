@@ -108,9 +108,9 @@ AuctionSchema.methods.softDelete = function() {
 
 const User = mongoose.model('users', UserSchema);
 const Auction = mongoose.model('auctions', AuctionSchema);
+const Payment = mongoose.model('payments', PaymentSchema);
 const Category = mongoose.model('categories', CategorySchema);
 const Bid = mongoose.model('bids', BidSchema);
-const Payment = mongoose.model('payments', PaymentSchema);
 const Log = mongoose.model('logs', LogSchema);
 
 export {

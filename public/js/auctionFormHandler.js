@@ -13,7 +13,13 @@ document.addEventListener('DOMContentLoaded', function() {
      * Fetch categories from the API and populate the dropdown
      */
     function fetchCategories() {
-      fetch('http://localhost:3000/api/admin/auction/categories')
+      fetch('/api/admin/auction/categories', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
         .then(response => response.json())
         .then(data => {
           if (data.success && data.categories) {
@@ -256,8 +262,12 @@ document.addEventListener('DOMContentLoaded', function() {
       toggleLoadingState(true);
       
       // Send the request
-      fetch('http://localhost:3000/api/admin/auction/create', {
+      fetch('/api/admin/auction/create', {
         method: 'POST',
+        credentials: 'include',
+        headers: {
+            'Content-Type': 'application/json'
+        },
         body: formData,
       })
         .then(response => response.json())
