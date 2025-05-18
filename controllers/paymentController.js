@@ -12,10 +12,6 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_API_SECRET
 });
 
-/**
- * Create a payment order with Razorpay
- * @route POST /api/payments/create
- */
 export const createPayment = async (req, res) => {
     console.log(`Backend createPayemt: ${JSON.stringify(req.body)}`);
   try {
@@ -156,10 +152,7 @@ export const createPayment = async (req, res) => {
   }
 };
 
-/**
- * Verify payment signature and update database
- * @route POST /api/payments/verify
- */
+
 export const verifyPayment = async (req, res) => {
   try {
     const {
@@ -216,10 +209,9 @@ export const verifyPayment = async (req, res) => {
       });
     }
 
-    // If we've reached here, payment is successful
-    // Update payment details in database
+    
     payment.paymentStatus = 'completed';
-    payment.transactionId = razorpay_payment_id; // Update with actual payment ID
+    payment.transactionId = razorpay_payment_id; 
     await payment.save();
 
     // Handle auction bidder registration or final payment
@@ -247,14 +239,12 @@ export const verifyPayment = async (req, res) => {
         redirectUrl: `/auctions/${auction._id}`
       });
     } else if (payment.paymentType === 'final') {
-      // Handle final auction payment logic
-      // You might want to update auction status or trigger other workflows
       
       return res.status(200).json({
         success: true,
         message: 'Final payment successful. Auction purchase completed.',
         payment,
-        redirectUrl: `/auctions/${auction._id}/purchase-success`
+        redirectUrl: `/auctions/${auction._id}`
       });
     }
 
@@ -275,11 +265,7 @@ export const verifyPayment = async (req, res) => {
   }
 };
 
-/**
- * Handle payment webhook from Razorpay
- * This is a backup verification if client-side verification fails
- * @route POST /api/payments/webhook
- */
+
 export const paymentWebhook = async (req, res) => {
   try {
     const signature = req.headers['x-razorpay-signature'];
@@ -334,10 +320,6 @@ export const paymentWebhook = async (req, res) => {
   }
 };
 
-/**
- * Get payment status by payment ID
- * @route GET /api/payments/:id
- */
 export const getPaymentStatus = async (req, res) => {
   try {
     const { id } = req.params;
@@ -374,10 +356,7 @@ export const getPaymentStatus = async (req, res) => {
   }
 };
 
-/**
- * Cancel pending payment
- * @route POST /api/payments/:id/cancel
- */
+
 export const cancelPayment = async (req, res) => {
   try {
     const { id } = req.params;

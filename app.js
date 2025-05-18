@@ -9,7 +9,7 @@ import authRoutes from './routes/authRoutes.js';
 import frontendRoutes from './routes/frontendRoutes.js';
 import paymentRoutes from './routes/paymentRoutes.js';
 import userAuctionRoutes from './routes/user/auctionRoutes.js';
-
+import userBidRoutes from './routes/user/bidRoutes.js';
 
 
 dotenv.config();
@@ -54,6 +54,7 @@ app.use('/api/admin/auction', adminAuctionRoutes);
 
 // User
 app.use('/api/auctions', userAuctionRoutes);
+app.use('/api/bids', userBidRoutes);
 
 
 app.listen(process.env.PORT, () => {

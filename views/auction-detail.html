@@ -265,131 +265,223 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
   
   <script>
+    
     // Get auction ID from URL
-    function getAuctionIdFromUrl() {
-      const pathSegments = window.location.pathname.split('/');
-      return pathSegments[pathSegments.length - 1];
+function getAuctionIdFromUrl() {
+    const pathSegments = window.location.pathname.split('/');
+    return pathSegments[pathSegments.length - 1];
+  }
+  
+  // Format price with Indian Rupee symbol
+  function formatPrice(price) {
+    return new Intl.NumberFormat('en-IN', {
+      style: 'currency',
+      currency: 'INR',
+      maximumFractionDigits: 0
+    }).format(price);
+  }
+  
+  // Format date in a readable format
+  function formatDate(dateString) {
+    const options = { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    };
+    return new Date(dateString).toLocaleDateString('en-IN', options);
+  }
+  
+  // Calculate time remaining until a specific date
+  function calculateTimeRemaining(endDate) {
+    const now = new Date();
+    const end = new Date(endDate);
+    const diff = end - now;
+    
+    if (diff <= 0) {
+      return "Auction ended";
     }
     
-    // Format price with Indian Rupee symbol
-    function formatPrice(price) {
-      return new Intl.NumberFormat('en-IN', {
-        style: 'currency',
-        currency: 'INR',
-        maximumFractionDigits: 0
-      }).format(price);
-    }
+    // Calculate days, hours, minutes, seconds
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
     
-    // Format date in a readable format
-    function formatDate(dateString) {
-      const options = { 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      };
-      return new Date(dateString).toLocaleDateString('en-IN', options);
+    if (days > 0) {
+      return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    } else {
+      return `${hours}h ${minutes}m ${seconds}s`;
     }
+  }
+  
+  // Update countdown timer
+  function updateTimer(endDate) {
+    const timeRemainingElements = [
+      document.getElementById('timeRemaining'),
+      document.getElementById('timeRemainingBottom')
+    ];
     
-    // Calculate time remaining until a specific date
-    function calculateTimeRemaining(endDate) {
-      const now = new Date();
-      const end = new Date(endDate);
-      const diff = end - now;
+    const updateTimerDisplay = () => {
+      const timeRemaining = calculateTimeRemaining(endDate);
+      timeRemainingElements.forEach(element => {
+        if (element) element.textContent = timeRemaining;
+      });
+    };
+    
+    // Update immediately then set interval
+    updateTimerDisplay();
+    return setInterval(updateTimerDisplay, 1000);
+  }
+  
+  // Change main image when thumbnail is clicked
+  function setupImageGallery(images) {
+    const mainImage = document.getElementById('mainImage');
+    const thumbnailContainer = document.getElementById('thumbnailContainer');
+    
+    // Clear any existing thumbnails
+    thumbnailContainer.innerHTML = '';
+    
+    // Set main image to first image
+    if (images && images.length > 0) {
+      mainImage.style.backgroundImage = `url('${images[0]}')`;
       
-      if (diff <= 0) {
-        return "Auction ended";
+      // Add thumbnails
+      images.forEach((imageUrl, index) => {
+        const thumbnail = document.createElement('div');
+        thumbnail.className = 'thumbnail shadow-sm';
+        thumbnail.style.backgroundImage = `url('${imageUrl}')`;
+        thumbnail.onclick = () => {
+          mainImage.style.backgroundImage = `url('${imageUrl}')`;
+        };
+        thumbnailContainer.appendChild(thumbnail);
+      });
+    } else {
+      // Use placeholder if no images
+      mainImage.style.backgroundImage = "url('/api/placeholder/500/300')";
+      
+      // Add placeholder thumbnails
+      for (let i = 0; i < 3; i++) {
+        const thumbnail = document.createElement('div');
+        thumbnail.className = 'thumbnail shadow-sm';
+        thumbnail.style.backgroundImage = "url('/api/placeholder/120/80')";
+        thumbnailContainer.appendChild(thumbnail);
       }
+    }
+  }
+  
+  // Get status badge class based on status
+  function getStatusBadgeClass(status) {
+    switch(status.toLowerCase()) {
+      case 'active':
+        return 'status-active';
+      case 'upcoming':
+        return 'status-upcoming';
+      case 'ended':
+        return 'status-ended';
+      case 'draft':
+        return 'status-draft';
+      case 'pending':
+        return 'status-pending';
+      default:
+        return 'status-draft';
+    }
+  }
+  
+  // Place a bid on the auction
+  async function placeBid(auctionId, bidAmount) {
+    const userId = localStorage.getItem('userId');
+    console.log(`UserId: ${userId} type ${typeof userId}`);
+    try {
+      const response = await fetch(`/api/bids/auction/${auctionId}`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ bidAmount, userId })
+      });
       
-      // Calculate days, hours, minutes, seconds
-      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-      const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-      const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-      const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+      const data = await response.json();
       
-      if (days > 0) {
-        return `${days}d ${hours}h ${minutes}m ${seconds}s`;
+      if (data.success) {
+        // Show success toast/message
+        showToast('Bid placed successfully!', 'success');
+        // Refresh auction details to show updated bid
+        fetchAuctionDetails();
+        return true;
       } else {
-        return `${hours}h ${minutes}m ${seconds}s`;
+        // Show error message
+        showToast(data.message || 'Failed to place bid', 'danger');
+        return false;
       }
+    } catch (error) {
+      console.error('Error placing bid:', error);
+      showToast('Failed to connect to the server', 'danger');
+      return false;
+    }
+  }
+  
+  // Show toast message
+  function showToast(message, type = 'info') {
+    // Create toast container if it doesn't exist
+    let toastContainer = document.getElementById('toastContainer');
+    if (!toastContainer) {
+      toastContainer = document.createElement('div');
+      toastContainer.id = 'toastContainer';
+      toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+      document.body.appendChild(toastContainer);
     }
     
-    // Update countdown timer
-    function updateTimer(endDate) {
-      const timeRemainingElements = [
-        document.getElementById('timeRemaining'),
-        document.getElementById('timeRemainingBottom')
-      ];
-      
-      const updateTimerDisplay = () => {
-        const timeRemaining = calculateTimeRemaining(endDate);
-        timeRemainingElements.forEach(element => {
-          if (element) element.textContent = timeRemaining;
-        });
-      };
-      
-      // Update immediately then set interval
-      updateTimerDisplay();
-      return setInterval(updateTimerDisplay, 1000);
+    // Create toast element
+    const toastId = `toast-${Date.now()}`;
+    const toast = document.createElement('div');
+    toast.id = toastId;
+    toast.className = `toast align-items-center text-white bg-${type} border-0`;
+    toast.setAttribute('role', 'alert');
+    toast.setAttribute('aria-live', 'assertive');
+    toast.setAttribute('aria-atomic', 'true');
+    
+    toast.innerHTML = `
+      <div class="d-flex">
+        <div class="toast-body">
+          ${message}
+        </div>
+        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+    `;
+    
+    // Add toast to container
+    toastContainer.appendChild(toast);
+    
+    // Initialize and show toast
+    const bsToast = new bootstrap.Toast(toast, {
+      autohide: true,
+      delay: 3000
+    });
+    bsToast.show();
+    
+    // Remove toast when hidden
+    toast.addEventListener('hidden.bs.toast', () => {
+      toast.remove();
+    });
+  }
+  
+  // Get current highest bid
+  function getCurrentHighestBid(bidLog) {
+    if (!bidLog || bidLog.length === 0) {
+      return null;
     }
     
-    // Change main image when thumbnail is clicked
-    function setupImageGallery(images) {
-      const mainImage = document.getElementById('mainImage');
-      const thumbnailContainer = document.getElementById('thumbnailContainer');
-      
-      // Clear any existing thumbnails
-      thumbnailContainer.innerHTML = '';
-      
-      // Set main image to first image
-      if (images && images.length > 0) {
-        mainImage.style.backgroundImage = `url('${images[0]}')`;
-        
-        // Add thumbnails
-        images.forEach((imageUrl, index) => {
-          const thumbnail = document.createElement('div');
-          thumbnail.className = 'thumbnail shadow-sm';
-          thumbnail.style.backgroundImage = `url('${imageUrl}')`;
-          thumbnail.onclick = () => {
-            mainImage.style.backgroundImage = `url('${imageUrl}')`;
-          };
-          thumbnailContainer.appendChild(thumbnail);
-        });
-      } else {
-        // Use placeholder if no images
-        mainImage.style.backgroundImage = "url('/api/placeholder/500/300')";
-        
-        // Add placeholder thumbnails
-        for (let i = 0; i < 3; i++) {
-          const thumbnail = document.createElement('div');
-          thumbnail.className = 'thumbnail shadow-sm';
-          thumbnail.style.backgroundImage = "url('/api/placeholder/120/80')";
-          thumbnailContainer.appendChild(thumbnail);
-        }
-      }
-    }
-    
-    // Get status badge class based on status
-    function getStatusBadgeClass(status) {
-      switch(status.toLowerCase()) {
-        case 'active':
-          return 'status-active';
-        case 'upcoming':
-          return 'status-upcoming';
-        case 'ended':
-          return 'status-ended';
-        case 'draft':
-          return 'status-draft';
-        case 'pending':
-          return 'status-pending';
-        default:
-          return 'status-draft';
-      }
-    }
-    
-   // Set up bid form based on auction status
-function setupBidForm(auction) {
+    // Find highest bid
+    return bidLog.reduce((highest, current) => {
+      return current.bidAmount > highest.bidAmount ? current : highest;
+    }, bidLog[0]);
+  }
+  
+  // Set up bid form based on auction status
+  function setupBidForm(auction) {
     const bidFormContainer = document.getElementById('bidFormContainer');
     const statusMessageContainer = document.getElementById('statusMessageContainer');
     
@@ -399,14 +491,24 @@ function setupBidForm(auction) {
     
     // Get current logged in user ID from localStorage
     const currentUserId = JSON.parse(localStorage.getItem('userId')).trim();
-    console.log(`UserID: ${currentUserId}`)
+    console.log(`UserID: ${currentUserId}`);
     
     // Check if current user is registered as a bidder for this auction
     const isRegisteredBidder = auction.bidders && auction.bidders.some(bidder => bidder._id === currentUserId);
     
     console.log(`Registered: ${isRegisteredBidder}`);
+    
     // Check status and setup appropriate UI
     const status = auction.status.toLowerCase();
+    
+    // Get current highest bid
+    const highestBid = getCurrentHighestBid(auction.bidLog);
+    let minimumBidAmount = auction.basePrice;
+    
+    if (highestBid) {
+      // Minimum bid is current highest + increment (1000 as default)
+      minimumBidAmount = highestBid.bidAmount + 1000;
+    }
     
     if (status === 'active') {
       if (isRegisteredBidder) {
@@ -420,29 +522,75 @@ function setupBidForm(auction) {
         
         // Show bid form
         bidFormContainer.innerHTML = `
-          <div class="input-group mb-2">
-            <input type="text" class="form-control" placeholder="Enter amount (₹)" 
-                   value="${formatPrice(auction.basePrice).replace('₹', '')}">
-            <button class="btn btn-success"><i class="fas fa-gavel me-2"></i> Place Bid</button>
-          </div>
-          <div class="text-center text-muted small">
-            Minimum increment: ₹1,000
-          </div>
+          <form id="bidForm" class="needs-validation" novalidate>
+            <div class="input-group mb-2">
+              <input type="text" id="bidAmount" class="form-control" placeholder="Enter amount (₹)" 
+                     min="${minimumBidAmount}" value="${formatPrice(minimumBidAmount).replace('₹', '').trim()}" required>
+              <button type="submit" id="placeBidButton" class="btn btn-success">
+                <i class="fas fa-gavel me-2"></i> Place Bid
+              </button>
+            </div>
+            <div class="text-center text-muted small">
+              Minimum bid: ${formatPrice(minimumBidAmount)}
+            </div>
+          </form>
         `;
+        
+        // Add event listener to bid form
+        document.getElementById('bidForm').addEventListener('submit', async function(e) {
+          e.preventDefault();
+          
+          const bidAmountInput = document.getElementById('bidAmount');
+          let bidAmount = bidAmountInput.value.replace(/[₹,\s]/g, '');
+          bidAmount = parseInt(bidAmount, 10);
+          
+          // Validate bid amount
+          if (isNaN(bidAmount) || bidAmount < minimumBidAmount) {
+            showToast(`Bid must be at least ${formatPrice(minimumBidAmount)}`, 'warning');
+            return;
+          }
+          
+          // Disable button while processing
+          const placeBidButton = document.getElementById('placeBidButton');
+          const originalButtonText = placeBidButton.innerHTML;
+          placeBidButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Placing bid...';
+          placeBidButton.disabled = true;
+          
+          try {
+            // Place bid
+            const success = await placeBid(auction._id, bidAmount);
+            
+            // Reset form if bid was successful
+            if (success) {
+              bidAmountInput.value = formatPrice(minimumBidAmount + 1000).replace('₹', '').trim();
+            }
+          } finally {
+            // Re-enable button regardless of outcome
+            placeBidButton.innerHTML = originalButtonText;
+            placeBidButton.disabled = false;
+          }
+        });
+        
       } else {
         // User is NOT registered but auction is active
         statusMessageContainer.className = 'bg-warning bg-opacity-10 text-warning text-center p-3 rounded mb-3';
         statusMessageContainer.innerHTML = `
           <i class="fas fa-exclamation-triangle fs-4 mb-2"></i>
           <div class="fw-bold mb-1">Not Registered</div>
-          
+          <div class="small">You must register to place bids</div>
         `;
         
-        /** bidFormContainer.innerHTML = `
-          <button class="btn btn-warning w-100">
+        bidFormContainer.innerHTML = `
+          <button class="btn btn-warning w-100" id="registerButton">
             <i class="fas fa-user-plus me-2"></i> Register for this Auction
           </button>
-        `; */
+        `;
+        
+        // Add event listener for register button
+        document.getElementById('registerButton').addEventListener('click', function() {
+          // Implement registration logic here
+          showToast('Registration feature not implemented yet', 'info');
+        });
       }
     } else if (status === 'upcoming') {
       statusMessageContainer.className = 'bg-primary bg-opacity-10 text-primary text-center p-3 rounded mb-3';
@@ -453,10 +601,16 @@ function setupBidForm(auction) {
       `;
       
       bidFormContainer.innerHTML = `
-        <button class="btn btn-primary w-100">
+        <button class="btn btn-primary w-100" id="registerButton">
           <i class="fas fa-user-plus me-2"></i> Register for this Auction
         </button>
       `;
+      
+      // Add event listener for register button
+      document.getElementById('registerButton').addEventListener('click', function() {
+        // Implement registration logic here
+        showToast('Registration feature not implemented yet', 'info');
+      });
     } else if (status === 'draft') {
       statusMessageContainer.className = 'bg-dark bg-opacity-10 text-dark text-center p-3 rounded mb-3';
       statusMessageContainer.innerHTML = `
@@ -479,169 +633,214 @@ function setupBidForm(auction) {
       `;
     }
   }
-    
-    // Share auction function
-    function shareAuction() {
-      if (navigator.share) {
-        navigator.share({
-          title: document.getElementById('auctionTitle').textContent,
-          url: window.location.href
-        }).catch(err => {
-          console.error('Error sharing:', err);
-        });
-      } else {
-        // Fallback
-        const dummy = document.createElement('input');
-        document.body.appendChild(dummy);
-        dummy.value = window.location.href;
-        dummy.select();
-        document.execCommand('copy');
-        document.body.removeChild(dummy);
-        alert('Auction link copied to clipboard!');
-      }
+  
+  // Share auction function
+  function shareAuction() {
+    if (navigator.share) {
+      navigator.share({
+        title: document.getElementById('auctionTitle').textContent,
+        url: window.location.href
+      }).catch(err => {
+        console.error('Error sharing:', err);
+      });
+    } else {
+      // Fallback
+      const dummy = document.createElement('input');
+      document.body.appendChild(dummy);
+      dummy.value = window.location.href;
+      dummy.select();
+      document.execCommand('copy');
+      document.body.removeChild(dummy);
+      alert('Auction link copied to clipboard!');
     }
-    
-    // Display auction details
-    function displayAuctionDetails(auction) {
-      // Hide loading spinner and show auction container
-      document.getElementById('loadingSpinner').classList.add('d-none');
-      document.getElementById('auctionContainer').classList.remove('d-none');
-      
-      // Set title and description
-      document.getElementById('auctionTitle').textContent = auction.title;
-      document.getElementById('auctionDescription').textContent = auction.description;
-      
-      // Set status badge
-      const statusBadge = document.getElementById('statusBadge');
-      statusBadge.textContent = auction.status.charAt(0).toUpperCase() + auction.status.slice(1);
-      statusBadge.className = `status-badge ${getStatusBadgeClass(auction.status)}`;
-      
-      // Set prices
-      document.getElementById('basePrice').textContent = formatPrice(auction.basePrice);
-      document.getElementById('currentBid').textContent = formatPrice(auction.basePrice); // Using base price as current bid if no bids
-      document.getElementById('emdAmount').textContent = formatPrice(auction.emdAmount);
-      
-      // Set total bids
-      document.getElementById('totalBids').textContent = auction.bidLog ? auction.bidLog.length : 0;
-      
-      // Setup image gallery
-      setupImageGallery(auction.images);
-      
-      // Setup countdown timer
-      let timerInterval = updateTimer(auction.endDate);
-      
-      // Setup details table
-      const detailsTable = document.getElementById('detailsTable');
-      detailsTable.innerHTML = `
-        <tr>
-          <td class="table-light fw-bold" style="width: 40%;">Auction ID</td>
-          <td>${auction._id}</td>
-        </tr>
-        <tr>
-          <td class="table-light fw-bold">Start Date</td>
-          <td>${formatDate(auction.startDate)}</td>
-        </tr>
-        <tr>
-          <td class="table-light fw-bold">End Date</td>
-          <td>${formatDate(auction.endDate)}</td>
-        </tr>
-        <tr>
-          <td class="table-light fw-bold">Registration Deadline</td>
-          <td>${formatDate(auction.registrationDeadline)}</td>
-        </tr>
-        <tr>
-          <td class="table-light fw-bold">EMD Amount</td>
-          <td>${formatPrice(auction.emdAmount)}</td>
-        </tr>
-        <tr>
-          <td class="table-light fw-bold">Status</td>
-          <td>${auction.status.charAt(0).toUpperCase() + auction.status.slice(1)}</td>
-        </tr>
-      `;
-      
-      // Setup bid form based on auction status
-      setupBidForm(auction);
-      
-      // Setup bid history
-      const bidHistoryContainer = document.getElementById('bidHistoryContainer');
-      if (auction.bidLog && auction.bidLog.length > 0) {
-        let bidHistoryHTML = '';
-        auction.bidLog.forEach(bid => {
-          // Find bidder name by matching userId from bidLog with _id from bidders array
-          let bidderName = bid.bidder; // Default to bidder ID in case name isn't found
-          
-          // Look for matching bidder in the bidders array
-          if (auction.bidders && auction.bidders.length > 0) {
-            const matchingBidder = auction.bidders.find(bidder => bidder._id === bid.userId);
-            if (matchingBidder) {
-              bidderName = matchingBidder.name; // Use the bidder's name if found
-            }
-          }
-          
-          bidHistoryHTML += `
-            <tr>
-              <td>${bidderName}</td>
-              <td class="text-end fw-bold">${formatPrice(bid.bidAmount)}</td>
-              <td class="text-end text-muted">${new Date(bid.createdAt).toLocaleTimeString()}</td>
-            </tr>
-          `;
-        });
-        bidHistoryContainer.innerHTML = bidHistoryHTML;
-      } else {
-        bidHistoryContainer.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No bids yet</td></tr>';
-      }
-      
-      // Return the timer interval for cleanup
-      return timerInterval;
-    }
-    
-    // Fetch auction details from API
-    function fetchAuctionDetails() {
-      const auctionId = getAuctionIdFromUrl();
-      let timerInterval;
-      
-      fetch(`/api/auctions/${auctionId}`,  {
+  }
+  
+  // Get bids for auction
+  async function getBidsForAuction(auctionId) {
+    try {
+      const response = await fetch(`/api/bids/auction/${auctionId}`, {
         method: 'GET',
         credentials: 'include',
         headers: {
-            'Content-Type': 'application/json'
+          'Content-Type': 'application/json'
         }
-    })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success && data.auctionDetails) {
-            // Update document title with auction name
-            document.title = `${data.auctionDetails.title} - Auction Detail`;
-            
-            // Display auction details
-            timerInterval = displayAuctionDetails(data.auctionDetails);
-          } else {
-            // Show error message
-            document.getElementById('loadingSpinner').classList.add('d-none');
-            document.getElementById('errorMessage').classList.remove('d-none');
-            document.getElementById('errorText').textContent = data.message || 'Failed to load auction details.';
-          }
-        })
-        .catch(error => {
-          console.error('Error fetching auction details:', error);
-          document.getElementById('loadingSpinner').classList.add('d-none');
-          document.getElementById('errorMessage').classList.remove('d-none');
-          document.getElementById('errorText').textContent = 'Failed to connect to the server. Please try again.';
-        });
+      });
       
-      // Cleanup function for timer
-      return () => {
-        if (timerInterval) clearInterval(timerInterval);
-      };
+      const data = await response.json();
+      
+      if (data.success) {
+        return data.bids || [];
+      } else {
+        console.error('Failed to get bids:', data.message);
+        return [];
+      }
+    } catch (error) {
+      console.error('Error getting bids:', error);
+      return [];
+    }
+  }
+  
+  // Display auction details
+  function displayAuctionDetails(auction) {
+    // Hide loading spinner and show auction container
+    document.getElementById('loadingSpinner').classList.add('d-none');
+    document.getElementById('auctionContainer').classList.remove('d-none');
+    
+    // Set title and description
+    document.getElementById('auctionTitle').textContent = auction.title;
+    document.getElementById('auctionDescription').textContent = auction.description;
+    
+    // Set status badge
+    const statusBadge = document.getElementById('statusBadge');
+    statusBadge.textContent = auction.status.charAt(0).toUpperCase() + auction.status.slice(1);
+    statusBadge.className = `status-badge ${getStatusBadgeClass(auction.status)}`;
+    
+    // Get current highest bid
+    const highestBid = getCurrentHighestBid(auction.bidLog);
+    const currentBidAmount = highestBid ? highestBid.bidAmount : auction.basePrice;
+    
+    // Set prices
+    document.getElementById('basePrice').textContent = formatPrice(auction.basePrice);
+    document.getElementById('currentBid').textContent = formatPrice(currentBidAmount);
+    document.getElementById('emdAmount').textContent = formatPrice(auction.emdAmount);
+    
+    // Set total bids
+    document.getElementById('totalBids').textContent = auction.bidLog ? auction.bidLog.length : 0;
+    
+    // Setup image gallery
+    setupImageGallery(auction.images);
+    
+    // Setup countdown timer
+    let timerInterval = updateTimer(auction.endDate);
+    
+    // Setup details table
+    const detailsTable = document.getElementById('detailsTable');
+    detailsTable.innerHTML = `
+      <tr>
+        <td class="table-light fw-bold" style="width: 40%;">Auction ID</td>
+        <td>${auction._id}</td>
+      </tr>
+      <tr>
+        <td class="table-light fw-bold">Start Date</td>
+        <td>${formatDate(auction.startDate)}</td>
+      </tr>
+      <tr>
+        <td class="table-light fw-bold">End Date</td>
+        <td>${formatDate(auction.endDate)}</td>
+      </tr>
+      <tr>
+        <td class="table-light fw-bold">Registration Deadline</td>
+        <td>${formatDate(auction.registrationDeadline)}</td>
+      </tr>
+      <tr>
+        <td class="table-light fw-bold">EMD Amount</td>
+        <td>${formatPrice(auction.emdAmount)}</td>
+      </tr>
+      <tr>
+        <td class="table-light fw-bold">Status</td>
+        <td>${auction.status.charAt(0).toUpperCase() + auction.status.slice(1)}</td>
+      </tr>
+    `;
+    
+    // Setup bid form based on auction status
+    setupBidForm(auction);
+    
+    // Setup bid history
+    const bidHistoryContainer = document.getElementById('bidHistoryContainer');
+    if (auction.bidLog && auction.bidLog.length > 0) {
+      let bidHistoryHTML = '';
+      // Sort bids by timestamp in descending order (newest first)
+      const sortedBids = [...auction.bidLog].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      sortedBids.forEach(bid => {
+        // Find bidder name by matching userId from bidLog with _id from bidders array
+        let bidderName = bid.bidder || "Unknown"; // Default to bidder ID or "Unknown" if not available
+        
+        // Look for matching bidder in the bidders array
+        if (auction.bidders && auction.bidders.length > 0) {
+          const matchingBidder = auction.bidders.find(bidder => bidder._id === bid.userId);
+          if (matchingBidder) {
+            bidderName = matchingBidder.name; // Use the bidder's name if found
+          }
+        }
+        
+        // Highlight if it's the current user's bid
+        const currentUserId = JSON.parse(localStorage.getItem('userId')).trim();
+        const isCurrentUserBid = bid.userId === currentUserId;
+        const rowClass = isCurrentUserBid ? 'table-success' : '';
+        
+        bidHistoryHTML += `
+          <tr class="${rowClass}">
+            <td>${bidderName}${isCurrentUserBid ? ' (You)' : ''}</td>
+            <td class="text-end fw-bold">${formatPrice(bid.bidAmount)}</td>
+            <td class="text-end text-muted">${new Date(bid.createdAt).toLocaleTimeString()}</td>
+          </tr>
+        `;
+      });
+      bidHistoryContainer.innerHTML = bidHistoryHTML;
+    } else {
+      bidHistoryContainer.innerHTML = '<tr><td colspan="3" class="text-center text-muted">No bids yet</td></tr>';
     }
     
-    // Run when the document is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      const cleanup = fetchAuctionDetails();
-      
-      // Clean up timers when page is unloaded
-      window.addEventListener('beforeunload', cleanup);
+    // Return the timer interval for cleanup
+    return timerInterval;
+  }
+  
+  // Fetch auction details from API
+  function fetchAuctionDetails() {
+    const auctionId = getAuctionIdFromUrl();
+    let timerInterval;
+    
+    fetch(`/api/auctions/${auctionId}`, {
+      method: 'GET',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.success && data.auctionDetails) {
+        // Update document title with auction name
+        document.title = `${data.auctionDetails.title} - Auction Detail`;
+        
+        // Display auction details
+        timerInterval = displayAuctionDetails(data.auctionDetails);
+      } else {
+        // Show error message
+        document.getElementById('loadingSpinner').classList.add('d-none');
+        document.getElementById('errorMessage').classList.remove('d-none');
+        document.getElementById('errorText').textContent = data.message || 'Failed to load auction details.';
+      }
+    })
+    .catch(error => {
+      console.error('Error fetching auction details:', error);
+      document.getElementById('loadingSpinner').classList.add('d-none');
+      document.getElementById('errorMessage').classList.remove('d-none');
+      document.getElementById('errorText').textContent = 'Failed to connect to the server. Please try again.';
     });
+    
+    // Cleanup function for timer
+    return () => {
+      if (timerInterval) clearInterval(timerInterval);
+    };
+  }
+  
+  // Run when the document is loaded
+  document.addEventListener('DOMContentLoaded', function() {
+    // Add toast container to body
+    const toastContainer = document.createElement('div');
+    toastContainer.id = 'toastContainer';
+    toastContainer.className = 'toast-container position-fixed bottom-0 end-0 p-3';
+    document.body.appendChild(toastContainer);
+    
+    const cleanup = fetchAuctionDetails();
+    
+    // Clean up timers when page is unloaded
+    window.addEventListener('beforeunload', cleanup);
+  });
+
+
   </script>
 </body>
 </html>

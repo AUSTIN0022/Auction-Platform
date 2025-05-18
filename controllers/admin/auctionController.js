@@ -24,10 +24,10 @@ export const createAuction = async (req, res) => {
     let { title, description, basePrice, startDate, endDate, registrationDeadline, emdAmount, status, categorie, createdBy,} = req.body;
     console.log("Request in backend controller");
     console.log(`creadeBy: ${createdBy} Typeof: ${typeof createdBy}`);
-    // Clean up createdBy - remove any extra quotation marks
-if (typeof createdBy === 'string') {
-    createdBy = createdBy.replace(/^"|"$/g, '');
-}
+    
+        if (typeof createdBy === 'string') {
+            createdBy = createdBy.replace(/^"|"$/g, '');
+        }
     try{
         const images = req.files ? req.files.map(file => file.path): [];
 
